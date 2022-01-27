@@ -2,7 +2,9 @@
 /*
  * Copyright (C) 2020, Raspberry Pi (Trading) Ltd.
  *
- * Based on: libcamera_hello.cpp - libcamera "hello world" app.
+ * Based on:
+ *   libcamera_hello.cpp - libcamera "hello world" app.
+ *   libcamera_still.cpp - libcamera stills capture app.
  */
 
 #include <chrono>
@@ -14,6 +16,50 @@
 #include "image/image.hpp"
 
 using namespace std::placeholders;
+
+extern "C"
+{
+    #include "EPD_2in13_V2.h"
+    #include "GUI_Paint.h"
+
+    // DEV_Config.h
+    UBYTE DEV_Module_Init(void);
+
+    // GUI_Paint.h
+    void Paint_DrawRectangle(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD Color, DOT_PIXEL Line_width, DRAW_FILL Draw_Fill);
+    void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD Color);
+    void Paint_SelectImage(UBYTE *image);
+    void Paint_SetMirroring(UBYTE mirror);
+};
+
+static int eink()
+{
+    UBYTE *Image;
+    UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0)? (EPD_2IN13_V2_WIDTH / 8 ): (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
+
+    if((Image = (UBYTE *)malloc(Imagesize)) == NULL)
+    {
+        std::cerr << "Failed to apply for black memory..." << std::endl;
+        return -1;
+    }
+
+    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+    Paint_SelectImage(Image);
+    Paint_SetMirroring(MIRROR_VERTICAL);
+    Paint_DrawRectangle(20, 70, 70, 120, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+
+    if(DEV_Module_Init() != 0){ return -1; }
+
+    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+    EPD_2IN13_V2_Display(Image);
+
+    DEV_Module_Exit();
+
+    free(Image);
+    Image = NULL;
+
+    return 0;
+}
 
 static StillOptions* get_still_options(LibcameraApp &app)
 {
@@ -82,6 +128,8 @@ static void save_still(LibcameraApp &app)
 
     app.StopCamera();
     std::cerr << "Still capture image received" << std::endl;
+
+    eink();
 
     if (options->output.empty())
     {
