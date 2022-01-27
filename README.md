@@ -3,6 +3,7 @@
 ## Dependencies
 
 - https://www.airspayce.com/mikem/bcm2835/
+- cmake
 
 ## Build
 
