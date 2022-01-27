@@ -19,46 +19,59 @@ using namespace std::placeholders;
 
 extern "C"
 {
+    #include "DEV_Config.h"
     #include "EPD_2in13_V2.h"
     #include "GUI_Paint.h"
-
-    // DEV_Config.h
-    UBYTE DEV_Module_Init(void);
-
-    // GUI_Paint.h
-    void Paint_DrawRectangle(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD Color, DOT_PIXEL Line_width, DRAW_FILL Draw_Fill);
-    void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD Color);
-    void Paint_SelectImage(UBYTE *image);
-    void Paint_SetMirroring(UBYTE mirror);
 };
 
-static int eink()
+// FIXME: remove globals
+UBYTE *Image;
+UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0)? (EPD_2IN13_V2_WIDTH / 8 ): (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
+
+static void eink_open()
 {
-    UBYTE *Image;
-    UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0)? (EPD_2IN13_V2_WIDTH / 8 ): (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
-
     if((Image = (UBYTE *)malloc(Imagesize)) == NULL)
-    {
-        std::cerr << "Failed to apply for black memory..." << std::endl;
-        return -1;
-    }
+        throw std::runtime_error("Failed to allocate eink memory");
 
-    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 0, WHITE);
     Paint_SelectImage(Image);
     Paint_SetMirroring(MIRROR_VERTICAL);
-    Paint_DrawRectangle(20, 70, 70, 120, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+    Paint_Clear(WHITE);
+    Paint_DrawString_EN(0, 0, "Camera is", &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(0, 20, "starting...", &Font16, WHITE, BLACK);
 
-    if(DEV_Module_Init() != 0){ return -1; }
+    if(DEV_Module_Init() != 0)
+        throw std::runtime_error("Failed to initialize eink module");
+}
 
+static void eink_draw_focus(int focus)
+{
+    Paint_Clear(WHITE);
+    Paint_DrawString_EN(0, 0, "FOCUS:", &Font16, WHITE, BLACK);
+    Paint_DrawNum(0, 20, focus, &Font16, BLACK, WHITE);
+}
+
+static void eink_display_base()
+{
     EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
-    EPD_2IN13_V2_Display(Image);
+    EPD_2IN13_V2_DisplayPartBaseImage(Image);
 
+    EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
+}
+
+static void eink_display_partial()
+{
+    EPD_2IN13_V2_DisplayPart(Image);
+}
+
+static void eink_close()
+{
+    EPD_2IN13_V2_Sleep();
+    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
     DEV_Module_Exit();
 
     free(Image);
     Image = NULL;
-
-    return 0;
 }
 
 static StillOptions* get_still_options(LibcameraApp &app)
@@ -86,6 +99,8 @@ static bool viewfinder_loop(LibcameraApp &app)
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
+    eink_display_base();
+
     while(true)
     {
         LibcameraApp::Msg msg = app.Wait();
@@ -111,6 +126,9 @@ static bool viewfinder_loop(LibcameraApp &app)
         CompletedRequestPtr &completed_request = std::get<CompletedRequestPtr>(msg.payload);
         FrameInfo frame_info(completed_request->metadata);
         std::cout << "FOCUS: " << frame_info.focus << std::endl;
+
+        eink_draw_focus(frame_info.focus);
+        eink_display_partial();
     }
 }
 
@@ -128,8 +146,6 @@ static void save_still(LibcameraApp &app)
 
     app.StopCamera();
     std::cerr << "Still capture image received" << std::endl;
-
-    eink();
 
     if (options->output.empty())
     {
@@ -166,6 +182,8 @@ static void event_loop(LibcameraApp &app)
 
 int main(int argc, char *argv[])
 {
+    eink_open();
+
     try
     {
         LibcameraApp app(std::make_unique<StillOptions>());
@@ -186,7 +204,12 @@ int main(int argc, char *argv[])
     catch (std::exception const &e)
     {
         std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
+        eink_close();
+
         return -1;
     }
+
+    eink_close();
+
     return 0;
 }
