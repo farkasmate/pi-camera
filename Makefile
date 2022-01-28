@@ -1,7 +1,22 @@
 all: libcamera-eink
 
+deps: bcm2835-1.71/src/libbcm2835.a libcamera/build/src/libcamera/libcamera.so
+
+install-deps: deps
+	$(MAKE) -C bcm2835-1.71 install
+	ninja -C libcamera/build install
+
+bcm2835-1.71/src/libbcm2835.a:
+	test -d bcm2835-1.71 || wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz -O - | tar xvz
+	cd bcm2835-1.71 && ./configure
+	$(MAKE) -C bcm2835-1.71
+
 e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o:
 	$(MAKE) -C e-Paper/RaspberryPi_JetsonNano/c RPI
+
+libcamera/build/src/libcamera/libcamera.so:
+	meson -Dprefix=/usr -Dlibdir=lib libcamera/build libcamera
+	ninja -C libcamera/build
 
 libcamera-apps/build/core/libcamera_app.so:
 	cmake -S libcamera-apps -B libcamera-apps/build -DENABLE_DRM=1 -DENABLE_X11=0 -DENABLE_QT=0 -DENABLE_OPENCV=0 -DENABLE_TFLITE=0
@@ -36,6 +51,8 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	strip libcamera-eink
 
 clean:
+	$(MAKE) -s -C bcm2835-1.71 clean || true
 	$(MAKE) -s -C e-Paper/RaspberryPi_JetsonNano/c clean || true
 	$(MAKE) -s -C libcamera-apps/build clean || true
+	ninja -C libcamera/build clean || true
 	rm -f libcamera-eink
