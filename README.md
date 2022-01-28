@@ -2,19 +2,25 @@
 
 ## Dependencies
 
-- https://www.airspayce.com/mikem/bcm2835/
+- [bcm2835](https://www.airspayce.com/mikem/bcm2835/)
 - cmake
 - libboost-program-options-dev
-- libcamera-dev
-- *libdrm-dev*
-- *libexif-dev*
+- libexif-dev
+- libgnutls28-dev
 - libjpeg-dev
-- *libtiff-dev*
+- libpng-dev
+- libtiff-dev
+- meson
+- ninja
+- python3
+- *...see Dockerfile...*
 
 ## Build
 
 ```shell
 git submodule init
 git submodule update
+# optionally
+# make install-deps
 make
 ```

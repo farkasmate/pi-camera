@@ -1,4 +1,3 @@
 *.swp
 bcm2835-1.71/
-eink
 libcamera-eink

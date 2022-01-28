@@ -1,0 +1,8 @@
+services:
+  builder:
+    build: .
+    image: build-libcamera-eink
+    volumes:
+    - ${PWD}:/workdir:rw
+    working_dir: /workdir
+    tty: true

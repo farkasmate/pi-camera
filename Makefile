@@ -6,6 +6,12 @@ install-deps: deps
 	$(MAKE) -C bcm2835-1.71 install
 	ninja -C libcamera/build install
 
+rebuild:
+	rm -f libcamera-eink
+	$(MAKE) libcamera-eink
+
+in_docker: install-deps rebuild
+
 bcm2835-1.71/src/libbcm2835.a:
 	test -d bcm2835-1.71 || wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz -O - | tar xvz
 	cd bcm2835-1.71 && ./configure
