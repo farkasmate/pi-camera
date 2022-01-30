@@ -51,6 +51,42 @@ static void eink_draw_focus(int focus)
     Paint_DrawNum(0, 20, focus, &Font16, BLACK, WHITE);
 }
 
+static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
+{
+    unsigned w = info.width, h = info.height, stride = info.stride;
+    uint8_t *Y = (uint8_t *)mem[0].data();
+    uint8_t *U = Y + stride * h;
+    uint8_t *V = U + (stride / 2) * (h / 2); // FIXME: /4
+
+    for (uint8_t j = 0; j < h; j++)
+    {
+        for (uint8_t i = 0; i < w; i++)
+        {
+            uint8_t yValue = *(Y + j * stride + i);
+            uint8_t uValue = *(U + (j / 2) * (stride / 2) + (i / 2));
+            uint8_t vValue = *(V + (j / 2) * (stride / 2) + (i / 2));
+
+            int rTmp = yValue + (351*(vValue-128))>>8;
+            int gTmp = yValue - (179*(vValue-128) + 86*(uValue-128))>>8;
+            int bTmp = yValue + (443*(uValue-128))>>8;
+
+            uint8_t r = std::clamp(rTmp, 0, 255);
+            uint8_t g = std::clamp(gTmp, 0, 255);
+            uint8_t b = std::clamp(bTmp, 0, 255);
+
+            uint8_t row_index = h - 1 - j;
+
+            // FIXME: 16 is from ceil(EPD_2IN13_V2_WIDTH / 8F) see ImageSize
+            // FIXME: draw bitmap in a "window"
+            // FIXME: dithering
+            if (yValue > 127)
+                image[row_index * 16 + i/8] |= 1UL<<(7-(i%8));
+            else
+                image[row_index * 16 + i/8] &= ~(1UL << (7-(i%8)));
+        }
+    }
+}
+
 static void eink_display_base()
 {
     EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
@@ -122,12 +158,18 @@ static bool viewfinder_loop(LibcameraApp &app)
             return true;
         }
 
-        // print focus value
+        // print and draw focus value
         CompletedRequestPtr &completed_request = std::get<CompletedRequestPtr>(msg.payload);
         FrameInfo frame_info(completed_request->metadata);
         std::cout << "FOCUS: " << frame_info.focus << std::endl;
 
+        libcamera::Stream *stream = app.LoresStream();
+        StreamInfo info = app.GetStreamInfo(stream);
+        const std::vector<libcamera::Span<uint8_t>> mem = app.Mmap(completed_request->buffers[stream]);
+
         eink_draw_focus(frame_info.focus);
+        eink_draw_viewfinder(Image, mem, info);
+
         eink_display_partial();
     }
 }
@@ -193,7 +235,9 @@ int main(int argc, char *argv[])
         {
             // hardcode options
             options->nopreview = true;
-            // TODO: lores viewfinder for eink preview?
+            options->lores_width = 122;
+            options->lores_height = 92;
+            options->encoding = "yuv420";
 
             if (options->verbose)
                 options->Print();
