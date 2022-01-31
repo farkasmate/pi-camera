@@ -15,8 +15,6 @@
 
 #include "image/image.hpp"
 
-using namespace std::placeholders;
-
 extern "C"
 {
     #include "DEV_Config.h"
@@ -57,9 +55,14 @@ static void eink_open()
 
 static void eink_draw_focus(int focus)
 {
-    Paint_Clear(WHITE);
-    Paint_DrawString_EN(0, 0, "FOCUS:", &Font16, WHITE, BLACK);
-    Paint_DrawNum(0, 20, focus, &Font16, BLACK, WHITE);
+    const char *focus_text = ("FOCUS: " + std::to_string(focus)).c_str();
+    Paint_DrawString_EN(0, 0, focus_text, &Font16, WHITE, BLACK);
+}
+
+static void eink_draw_time(int time)
+{
+    const char *time_text = ("TIME: " + std::to_string(time)).c_str();
+    Paint_DrawString_EN(0, 20, time_text, &Font16, WHITE, BLACK);
 }
 
 static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
@@ -168,16 +171,16 @@ static bool viewfinder_loop(LibcameraApp &app)
             return true;
         }
 
-        // print and draw focus value
+        // draw focus value
         CompletedRequestPtr &completed_request = std::get<CompletedRequestPtr>(msg.payload);
         FrameInfo frame_info(completed_request->metadata);
-        std::cout << "FOCUS: " << frame_info.focus << std::endl;
-
         libcamera::Stream *stream = app.LoresStream();
         StreamInfo info = app.GetStreamInfo(stream);
         const std::vector<libcamera::Span<uint8_t>> mem = app.Mmap(completed_request->buffers[stream]);
 
+        Paint_Clear(WHITE);
         eink_draw_focus(frame_info.focus);
+        eink_draw_time((now - start_time) / std::chrono::seconds(1));
         eink_draw_viewfinder(Image, mem, info);
 
         eink_display_partial();
