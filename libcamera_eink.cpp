@@ -9,6 +9,8 @@
 
 #include <chrono>
 
+#include "terminus16.hpp"
+
 #include "core/frame_info.hpp"
 #include "core/libcamera_app.hpp"
 #include "core/still_options.hpp"
@@ -46,8 +48,8 @@ static void eink_open()
     Paint_SelectImage(Image);
     Paint_SetMirroring(MIRROR_VERTICAL);
     Paint_Clear(WHITE);
-    Paint_DrawString_EN(0, 0, "Camera is", &Font16, WHITE, BLACK);
-    Paint_DrawString_EN(0, 20, "starting...", &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(0, 0, "Camera is", &Terminus16, WHITE, BLACK);
+    Paint_DrawString_EN(0, 20, "starting...", &Terminus16, WHITE, BLACK);
 
     if(DEV_Module_Init() != 0)
         throw std::runtime_error("Failed to initialize eink module");
@@ -56,13 +58,13 @@ static void eink_open()
 static void eink_draw_focus(int focus)
 {
     const char *focus_text = ("FOCUS: " + std::to_string(focus)).c_str();
-    Paint_DrawString_EN(0, 0, focus_text, &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(0, 0, focus_text, &Terminus16, WHITE, BLACK);
 }
 
 static void eink_draw_time(int time)
 {
     const char *time_text = ("TIME: " + std::to_string(time)).c_str();
-    Paint_DrawString_EN(0, 20, time_text, &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(0, 20, time_text, &Terminus16, WHITE, BLACK);
 }
 
 static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
