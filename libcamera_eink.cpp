@@ -50,7 +50,7 @@ static void eink_open()
     if((Image = (UBYTE *)malloc(Imagesize)) == NULL)
         throw std::runtime_error("Failed to allocate eink memory");
 
-    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 0, WHITE);
+    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 90, WHITE);
     Paint_SelectImage(Image);
     Paint_SetMirroring(MIRROR_VERTICAL);
     Paint_Clear(WHITE);
@@ -64,13 +64,13 @@ static void eink_open()
 static void eink_draw_focus(int focus)
 {
     const char *focus_text = ("FOCUS: " + std::to_string(focus)).c_str();
-    Paint_DrawString_EN(0, 0, focus_text, &Terminus16, WHITE, BLACK);
+    Paint_DrawString_EN(160, 0, focus_text, &Terminus16, WHITE, BLACK);
 }
 
 static void eink_draw_time(int time)
 {
     const char *time_text = ("TIME: " + std::to_string(time)).c_str();
-    Paint_DrawString_EN(0, 20, time_text, &Terminus16, WHITE, BLACK);
+    Paint_DrawString_EN(160, 20, time_text, &Terminus16, WHITE, BLACK);
 }
 
 static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
@@ -96,14 +96,12 @@ static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8
             uint8_t g = std::clamp(gTmp, 0, 255);
             uint8_t b = std::clamp(bTmp, 0, 255);
 
-            uint8_t row_index = h - 1 - j;
-
             // FIXME: 16 is from ceil(EPD_2IN13_V2_WIDTH / 8F) see ImageSize
             // FIXME: draw bitmap in a "window"
             if (yValue > 4 * bayer[j%8][i%8])
-                image[row_index * 16 + i/8] |= 1UL<<(7-(i%8));
+                image[(EPD_2IN13_V2_HEIGHT - 1 - i) * 16 + (EPD_2IN13_V2_WIDTH - j)/8] |= 1UL<<(7-((EPD_2IN13_V2_WIDTH - j)%8));
             else
-                image[row_index * 16 + i/8] &= ~(1UL << (7-(i%8)));
+                image[(EPD_2IN13_V2_HEIGHT - 1 - i) * 16 + (EPD_2IN13_V2_WIDTH - j)/8] &= ~(1UL << (7-((EPD_2IN13_V2_WIDTH - j)%8)));
         }
     }
 }
@@ -299,8 +297,8 @@ int main(int argc, char *argv[])
         {
             // hardcode options
             options->nopreview = true;
-            options->lores_width = 122;
-            options->lores_height = 92;
+            options->lores_width = 160;
+            options->lores_height = 122;
             options->encoding = "yuv420";
 
             if (options->verbose)
