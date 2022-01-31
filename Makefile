@@ -48,6 +48,7 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	  ./libcamera-apps/build/preview/libpreview.so \
 	  -lbcm2835 \
 	  -lboost_program_options \
+	  -lbsd \
 	  -lcamera \
 	  -lcamera-base \
 	  -lexif \

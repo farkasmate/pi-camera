@@ -6,6 +6,7 @@ RUN apt-get update && \
     cmake \
     git \
     libboost-program-options-dev \
+    libbsd-dev \
     libexif-dev \
     libgnutls28-dev \
     libjpeg-dev \

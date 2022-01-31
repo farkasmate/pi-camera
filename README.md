@@ -5,6 +5,7 @@
 - [bcm2835](https://www.airspayce.com/mikem/bcm2835/)
 - cmake
 - libboost-program-options-dev
+- libbsd-dev
 - libexif-dev
 - libgnutls28-dev
 - libjpeg-dev

@@ -10,6 +10,8 @@
 #include <chrono>
 #include <csignal>
 
+#include <bsd/libutil.h>
+
 #include "terminus16.hpp"
 
 #include "core/frame_info.hpp"
@@ -41,6 +43,7 @@ static const uint8_t bayer[8][8] = {
 };
 
 bool shutter = false;
+struct pidfh *pid;
 
 static void eink_open()
 {
@@ -253,6 +256,7 @@ static void event_loop(LibcameraApp &app)
 static void sigint_handler(int signo)
 {
     eink_close();
+    pidfile_remove(pid);
 
     exit(1);
 }
@@ -262,10 +266,27 @@ static void sigusr1_handler(int signo)
     shutter = true;
 }
 
+static void create_pid_file()
+{
+
+    pid = pidfile_open("/var/run/libcamera_eink.pid", 0600, NULL);
+
+    if (pid == NULL && errno == EEXIST)
+    {
+        std::cerr << "can't lock PID file" << std::endl;
+
+        exit(2);
+    }
+
+    pidfile_write(pid);
+}
+
 int main(int argc, char *argv[])
 {
     std::signal(SIGINT, sigint_handler);
     std::signal(SIGUSR1, sigusr1_handler);
+
+    create_pid_file();
 
     eink_open();
 
@@ -297,6 +318,7 @@ int main(int argc, char *argv[])
     }
 
     eink_close();
+    pidfile_remove(pid);
 
     return 0;
 }
