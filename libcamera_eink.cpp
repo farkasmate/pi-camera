@@ -8,6 +8,7 @@
  */
 
 #include <chrono>
+#include <csignal>
 
 #include "terminus16.hpp"
 
@@ -38,6 +39,8 @@ static const uint8_t bayer[8][8] = {
     {15, 47,  7, 39, 13, 45,  5, 37},
     {63, 31, 55, 23, 61, 29, 53, 21}
 };
+
+bool shutter = false;
 
 static void eink_open()
 {
@@ -166,7 +169,17 @@ static bool viewfinder_loop(LibcameraApp &app)
         auto now = std::chrono::high_resolution_clock::now();
         if (options->timeout && now - start_time > std::chrono::milliseconds(options->timeout))
         {
-            std::cerr << "viewfinder timed out, saving photo" << std::endl;
+            std::cerr << "viewfinder timed out" << std::endl;
+            app.StopCamera();
+            app.Teardown();
+
+            return false;
+        }
+
+        // shutter
+        if (shutter)
+        {
+            std::cerr << "saving photo" << std::endl;
             app.StopCamera();
             app.Teardown();
 
@@ -237,8 +250,23 @@ static void event_loop(LibcameraApp &app)
     // DO NOT call app.CloseCamera() explicitly
 }
 
+static void sigint_handler(int signo)
+{
+    eink_close();
+
+    exit(1);
+}
+
+static void sigusr1_handler(int signo)
+{
+    shutter = true;
+}
+
 int main(int argc, char *argv[])
 {
+    std::signal(SIGINT, sigint_handler);
+    std::signal(SIGUSR1, sigusr1_handler);
+
     eink_open();
 
     try
