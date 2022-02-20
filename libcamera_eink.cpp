@@ -12,7 +12,7 @@
 
 #include <bsd/libutil.h>
 
-#include "terminus16.hpp"
+#include "eink.cpp"
 
 #include "core/frame_info.hpp"
 #include "core/libcamera_app.hpp"
@@ -20,60 +20,27 @@
 
 #include "image/image.hpp"
 
-extern "C"
-{
-    #include "DEV_Config.h"
-    #include "EPD_2in13_V2.h"
-    #include "GUI_Paint.h"
-};
-
 // FIXME: remove globals
-UBYTE *Image;
-UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0)? (EPD_2IN13_V2_WIDTH / 8 ): (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
-
-static const uint8_t bayer[8][8] = {
-    { 0, 32,  8, 40,  2, 34, 10, 42},
-    {48, 16, 56, 24, 50, 18, 58, 26},
-    {12, 44,  4, 36, 14, 46,  6, 38},
-    {60, 28, 52, 20, 62, 30, 54, 22},
-    { 3, 35, 11, 43,  1, 33,  9, 41},
-    {51, 19, 59, 27, 49, 17, 57, 25},
-    {15, 47,  7, 39, 13, 45,  5, 37},
-    {63, 31, 55, 23, 61, 29, 53, 21}
-};
-
 bool shutter = false;
 struct pidfh *pid;
 
-static void eink_open()
+static StillOptions* get_still_options(LibcameraApp &app)
 {
-    if((Image = (UBYTE *)malloc(Imagesize)) == NULL)
-        throw std::runtime_error("Failed to allocate eink memory");
-
-    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 90, WHITE);
-    Paint_SelectImage(Image);
-    Paint_SetMirroring(MIRROR_VERTICAL);
-    Paint_Clear(WHITE);
-    Paint_DrawString_EN(0, 0, "Camera is", &Terminus16, WHITE, BLACK);
-    Paint_DrawString_EN(0, 20, "starting...", &Terminus16, WHITE, BLACK);
-
-    if(DEV_Module_Init() != 0)
-        throw std::runtime_error("Failed to initialize eink module");
+    return static_cast<StillOptions *>(app.GetOptions());
 }
 
-static void eink_draw_focus(int focus)
+static bool is_request_complete(LibcameraApp::Msg msg)
 {
-    const char *focus_text = ("FOCUS: " + std::to_string(focus)).c_str();
-    Paint_DrawString_EN(160, 0, focus_text, &Terminus16, WHITE, BLACK);
+    if (msg.type == LibcameraApp::MsgType::Quit)
+        return false;
+
+    if (msg.type != LibcameraApp::MsgType::RequestComplete)
+        throw std::runtime_error("unrecognised message!");
+
+    return true;
 }
 
-static void eink_draw_time(int time)
-{
-    const char *time_text = ("TIME: " + std::to_string(time)).c_str();
-    Paint_DrawString_EN(160, 20, time_text, &Terminus16, WHITE, BLACK);
-}
-
-static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
+static void draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info)
 {
     unsigned w = info.width, h = info.height, stride = info.stride;
     uint8_t *Y = (uint8_t *)mem[0].data();
@@ -99,50 +66,11 @@ static void eink_draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8
             // FIXME: 16 is from ceil(EPD_2IN13_V2_WIDTH / 8F) see ImageSize
             // FIXME: draw bitmap in a "window"
             if (yValue > 4 * bayer[j%8][i%8])
-                image[(EPD_2IN13_V2_HEIGHT - 1 - i) * 16 + (EPD_2IN13_V2_WIDTH - j)/8] |= 1UL<<(7-((EPD_2IN13_V2_WIDTH - j)%8));
+                image[(EINK_HEIGHT - 1 - i) * 16 + (EINK_WIDTH - j)/8] |= 1UL<<(7-((EINK_WIDTH - j)%8));
             else
-                image[(EPD_2IN13_V2_HEIGHT - 1 - i) * 16 + (EPD_2IN13_V2_WIDTH - j)/8] &= ~(1UL << (7-((EPD_2IN13_V2_WIDTH - j)%8)));
+                image[(EINK_HEIGHT - 1 - i) * 16 + (EINK_WIDTH - j)/8] &= ~(1UL << (7-((EINK_WIDTH - j)%8)));
         }
     }
-}
-
-static void eink_display_base()
-{
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
-    EPD_2IN13_V2_DisplayPartBaseImage(Image);
-
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
-}
-
-static void eink_display_partial()
-{
-    EPD_2IN13_V2_DisplayPart(Image);
-}
-
-static void eink_close()
-{
-    EPD_2IN13_V2_Sleep();
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
-    DEV_Module_Exit();
-
-    free(Image);
-    Image = NULL;
-}
-
-static StillOptions* get_still_options(LibcameraApp &app)
-{
-    return static_cast<StillOptions *>(app.GetOptions());
-}
-
-static bool is_request_complete(LibcameraApp::Msg msg)
-{
-    if (msg.type == LibcameraApp::MsgType::Quit)
-        return false;
-
-    if (msg.type != LibcameraApp::MsgType::RequestComplete)
-        throw std::runtime_error("unrecognised message!");
-
-    return true;
 }
 
 static bool viewfinder_loop(LibcameraApp &app)
@@ -194,10 +122,11 @@ static bool viewfinder_loop(LibcameraApp &app)
         StreamInfo info = app.GetStreamInfo(stream);
         const std::vector<libcamera::Span<uint8_t>> mem = app.Mmap(completed_request->buffers[stream]);
 
-        Paint_Clear(WHITE);
+        eink_clear();
         eink_draw_focus(frame_info.focus);
         eink_draw_time((now - start_time) / std::chrono::seconds(1));
-        eink_draw_viewfinder(Image, mem, info);
+
+        draw_viewfinder(Image, mem, info);
 
         eink_display_partial();
     }
