@@ -4,7 +4,7 @@ deps: bcm2835-1.71/src/libbcm2835.a libcamera/build/src/libcamera/libcamera.so
 
 install-deps: deps
 	$(MAKE) -C bcm2835-1.71 install
-	ninja -C libcamera/build install
+	meson install -C libcamera/build
 
 rebuild:
 	rm -f libcamera-eink
@@ -22,7 +22,7 @@ e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o:
 
 libcamera/build/src/libcamera/libcamera.so:
 	meson -Dprefix=/usr -Dlibdir=lib libcamera/build libcamera
-	ninja -C libcamera/build
+	meson compile -C libcamera/build
 
 libcamera-apps/build/core/libcamera_app.so:
 	cmake -S libcamera-apps -B libcamera-apps/build -DENABLE_DRM=1 -DENABLE_X11=0 -DENABLE_QT=0 -DENABLE_OPENCV=0 -DENABLE_TFLITE=0
@@ -61,6 +61,6 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 clean:
 	$(MAKE) -s -C bcm2835-1.71 clean || true
 	$(MAKE) -s -C e-Paper/RaspberryPi_JetsonNano/c clean || true
-	$(MAKE) -s -C libcamera-apps/build clean || true
-	ninja -C libcamera/build clean || true
+	rm -rf libcamera-apps/build
+	rm -rf libcamera/build
 	rm -f libcamera-eink

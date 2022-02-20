@@ -1,8 +1,13 @@
 services:
+  qemu:
+    image: multiarch/qemu-user-static
+    privileged: true
+    command: --reset -p yes
+
   builder:
     build: .
     image: build-libcamera-eink
     volumes:
-    - ${PWD}:/workdir:rw
+      - ${PWD}:/workdir:rw
     working_dir: /workdir
     tty: true

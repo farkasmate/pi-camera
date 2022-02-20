@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM arm32v5/debian:bullseye
 
 RUN apt-get update && \
   apt-get install -y \
