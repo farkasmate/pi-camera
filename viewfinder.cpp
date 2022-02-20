@@ -13,24 +13,12 @@ static void draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> 
 {
     unsigned w = info.width, h = info.height, stride = info.stride;
     uint8_t *Y = (uint8_t *)mem[0].data();
-    uint8_t *U = Y + stride * h;
-    uint8_t *V = U + (stride / 2) * (h / 2); // FIXME: /4
 
     for (uint8_t j = 0; j < h; j++)
     {
         for (uint8_t i = 0; i < w; i++)
         {
             uint8_t yValue = *(Y + j * stride + i);
-            uint8_t uValue = *(U + (j / 2) * (stride / 2) + (i / 2));
-            uint8_t vValue = *(V + (j / 2) * (stride / 2) + (i / 2));
-
-            int rTmp = yValue + (351*(vValue-128))>>8;
-            int gTmp = yValue - (179*(vValue-128) + 86*(uValue-128))>>8;
-            int bTmp = yValue + (443*(uValue-128))>>8;
-
-            uint8_t r = std::clamp(rTmp, 0, 255);
-            uint8_t g = std::clamp(gTmp, 0, 255);
-            uint8_t b = std::clamp(bTmp, 0, 255);
 
             // FIXME: 16 is from ceil(EPD_2IN13_V2_WIDTH / 8F) see ImageSize
             // FIXME: draw bitmap in a "window"
