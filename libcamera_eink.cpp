@@ -21,7 +21,7 @@ struct pidfh *pid;
 
 // The main event loop for the application.
 
-static void event_loop(LibcameraApp &app)
+static void event_loop(LibcameraEinkApp &app)
 {
     app.OpenCamera();
 
@@ -30,7 +30,7 @@ static void event_loop(LibcameraApp &app)
     if (!ready_to_save_still)
         throw std::runtime_error("Can't save photo");
 
-    save_still(app);
+    app.SaveStill();
 
     // DO NOT call app.CloseCamera() explicitly
 }
@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
 
     try
     {
-        LibcameraApp app(std::make_unique<StillOptions>());
-        StillOptions *options = get_still_options(app);
+        LibcameraEinkApp app;
+        StillOptions *options = app.GetOptions();
 
         if (options->Parse(argc, argv))
         {

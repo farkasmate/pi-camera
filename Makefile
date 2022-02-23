@@ -38,14 +38,12 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	  -I ./libcamera-apps \
 	  -I /usr/include/libcamera \
 	  libcamera_eink.cpp \
-	  terminus16.hpp \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/GUI_Paint.o \
 	  ./libcamera-apps/build/core/libcamera_app.so \
 	  ./libcamera-apps/build/image/libimages.so \
 	  ./libcamera-apps/build/post_processing_stages/libpost_processing_stages.so \
-	  ./libcamera-apps/build/preview/libpreview.so \
 	  -lbcm2835 \
 	  -lboost_program_options \
 	  -lbsd \

@@ -30,9 +30,9 @@ static void draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> 
     }
 }
 
-static bool viewfinder_loop(LibcameraApp &app)
+static bool viewfinder_loop(LibcameraEinkApp &app)
 {
-    StillOptions const *options = get_still_options(app);
+    StillOptions const *options = app.GetOptions();
 
     app.ConfigureViewfinder();
     app.StartCamera();
@@ -45,7 +45,7 @@ static bool viewfinder_loop(LibcameraApp &app)
     {
         LibcameraApp::Msg msg = app.Wait();
 
-        if (!is_request_complete(msg))
+        if (!app.IsRequestComplete())
             return false;
 
         if (!app.ViewfinderStream())
