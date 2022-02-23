@@ -13,7 +13,7 @@
 #include <bsd/libutil.h>
 
 #include "eink.cpp"
-#include "libcamera_helper.cpp"
+#include "libcamera_eink_app.cpp"
 #include "viewfinder.cpp"
 
 // FIXME: remove globals

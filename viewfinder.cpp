@@ -4,7 +4,7 @@
 #include "core/libcamera_app.hpp"
 #include "core/still_options.hpp"
 
-#include "libcamera_helper.cpp"
+#include "libcamera_eink_app.cpp"
 
 // FIXME: remove globals
 bool shutter = false;
