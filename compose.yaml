@@ -11,3 +11,10 @@ services:
       - ${PWD}:/workdir:rw
     working_dir: /workdir
     tty: true
+
+  linter:
+    build: .linter
+    volumes:
+      - ${PWD}:/workdir:rw
+    working_dir: /workdir
+    user: "${UID:-1000}:${GID:-1000}"

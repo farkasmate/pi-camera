@@ -12,8 +12,8 @@
 
 #include "fonts.h"
 
-const uint8_t Terminus16_Table[] =
-{
+// clang-format off
+const uint8_t Terminus16_Table[] = {
     0X00,
     0X00,
     0X00,
@@ -1537,7 +1537,8 @@ const uint8_t Terminus16_Table[] =
 };
 
 sFONT Terminus16 = {
-  Terminus16_Table,
-  8,  /* Width */
-  16, /* Height */
+    Terminus16_Table,
+    8,  /* Width */
+    16, /* Height */
 };
+// clang-format on
