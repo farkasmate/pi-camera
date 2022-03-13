@@ -43,7 +43,7 @@ static bool viewfinder_loop(LibcameraEinkApp &app)
 
     while(true)
     {
-        LibcameraApp::Msg msg = app.Wait();
+        LibcameraApp::Msg msg = app.GetLatestMsg();
 
         if (!app.IsRequestComplete())
             return false;

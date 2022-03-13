@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "core/libcamera_app.hpp"
 #include "core/still_options.hpp"
 
@@ -8,12 +10,33 @@
 class LibcameraEinkApp : public LibcameraApp
 {
     private:
+    const int MSG_TRIES = 10;
+    const std::chrono::milliseconds SLOW_MSG_THRESHOLD{10};
+
     Msg msg = Msg(MsgType::Quit);
 
     public:
     LibcameraEinkApp() : LibcameraApp(std::make_unique<StillOptions>()) {}
 
     StillOptions *GetOptions() const { return static_cast<StillOptions *>(options_.get()); }
+
+    Msg GetLatestMsg()
+    {
+        int tries = MSG_TRIES;
+        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+        std::chrono::high_resolution_clock::time_point stop = start;
+        std::chrono::microseconds duration{0};
+
+        while (duration < SLOW_MSG_THRESHOLD && tries-- > 0)
+        {
+            start = std::chrono::high_resolution_clock::now();
+            msg = LibcameraApp::Wait();
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        }
+
+        return msg;
+    }
 
     bool IsRequestComplete()
     {
