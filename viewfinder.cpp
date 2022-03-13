@@ -23,9 +23,9 @@ static void draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> 
             // FIXME: 16 is from ceil(EPD_2IN13_V2_WIDTH / 8F) see ImageSize
             // FIXME: draw bitmap in a "window"
             if (yValue > 4 * bayer[j%8][i%8])
-                image[(EINK_HEIGHT - 1 - i) * 16 + (EINK_WIDTH - j)/8] |= 1UL<<(7-((EINK_WIDTH - j)%8));
+                image[i * 16 + j/8] |= 1UL<<(7 - j%8);
             else
-                image[(EINK_HEIGHT - 1 - i) * 16 + (EINK_WIDTH - j)/8] &= ~(1UL << (7-((EINK_WIDTH - j)%8)));
+                image[i * 16 + j/8] &= ~(1UL << (7 - j%8));
         }
     }
 }

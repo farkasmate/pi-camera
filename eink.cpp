@@ -41,7 +41,7 @@ static void eink_open()
     if((Image = (UBYTE *)malloc(Imagesize)) == NULL)
         throw std::runtime_error("Failed to allocate eink memory");
 
-    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 90, WHITE);
+    Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
     Paint_SelectImage(Image);
     Paint_SetMirroring(MIRROR_VERTICAL);
     Paint_Clear(WHITE);

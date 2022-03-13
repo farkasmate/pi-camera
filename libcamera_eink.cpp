@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
         if (options->Parse(argc, argv))
         {
             // hardcode options
+            // FIXME: rotation = 180
             options->nopreview = true;
             options->lores_width = 160;
             options->lores_height = 122;
