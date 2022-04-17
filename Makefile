@@ -63,7 +63,7 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 test:
 	gcc \
 	  -D HEIGHT=150 \
-	  -D WIDTH=50 \
+	  -D WIDTH=100 \
 	  -std=gnu++17 \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
