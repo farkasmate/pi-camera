@@ -62,8 +62,14 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 
 test:
 	gcc \
+	  -D HEIGHT=150 \
+	  -D WIDTH=50 \
 	  -std=gnu++17 \
+	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
+	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
+	  -I ./QR-Code-generator/cpp \
 	  ./tests/test_qr.cpp \
+	  ./QR-Code-generator/cpp/qrcodegen.o \
 	  -l stdc++ \
 	  -o ./tests/run
 	./tests/run

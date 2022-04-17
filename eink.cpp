@@ -4,20 +4,17 @@
 #include <stdexcept>
 #include <vector>
 
+#include "dimensions.hpp"
 #include "terminus16.hpp"
 
 extern "C" {
 #include "DEV_Config.h"
-#include "EPD_2in13_V2.h"
 #include "GUI_Paint.h"
 };
 
-#define EINK_HEIGHT EPD_2IN13_V2_HEIGHT
-#define EINK_WIDTH EPD_2IN13_V2_WIDTH
-
 // FIXME: remove globals
 UBYTE *Image;
-UWORD Imagesize = ((EPD_2IN13_V2_WIDTH % 8 == 0) ? (EPD_2IN13_V2_WIDTH / 8) : (EPD_2IN13_V2_WIDTH / 8 + 1)) * EPD_2IN13_V2_HEIGHT;
+UWORD Imagesize = ((WIDTH % 8 == 0) ? (WIDTH / 8) : (WIDTH / 8 + 1)) * HEIGHT;
 
 // clang-format off
 static const uint8_t bayer[8][8] = {
@@ -38,7 +35,7 @@ static void eink_open() {
   if ((Image = (UBYTE *)malloc(Imagesize)) == NULL)
     throw std::runtime_error("Failed to allocate eink memory");
 
-  Paint_NewImage(Image, EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+  Paint_NewImage(Image, WIDTH, HEIGHT, 270, WHITE);
   Paint_SelectImage(Image);
   Paint_SetMirroring(MIRROR_VERTICAL);
   Paint_Clear(WHITE);
