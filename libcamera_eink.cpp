@@ -14,7 +14,10 @@
 
 #include "eink.cpp"
 #include "libcamera_eink_app.cpp"
+#include "qr.cpp"
 #include "viewfinder.cpp"
+
+#include "qrcodegen.hpp"
 
 // FIXME: remove globals
 struct pidfh *pid;
@@ -30,6 +33,10 @@ static void event_loop(LibcameraEinkApp &app) {
     throw std::runtime_error("Can't save photo");
 
   app.SaveStill();
+
+  const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
+  draw_qr(Image, qr);
+  eink_display_partial();
 
   // DO NOT call app.CloseCamera() explicitly
 }

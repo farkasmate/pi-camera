@@ -7,3 +7,6 @@
 [submodule "libcamera-apps"]
 	path = libcamera-apps
 	url = https://github.com/raspberrypi/libcamera-apps.git
+[submodule "QR-Code-generator"]
+	path = QR-Code-generator
+	url = https://github.com/nayuki/QR-Code-generator.git

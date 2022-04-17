@@ -28,7 +28,10 @@ libcamera-apps/build/core/libcamera_app.so:
 	cmake -S libcamera-apps -B libcamera-apps/build -DENABLE_DRM=1 -DENABLE_X11=0 -DENABLE_QT=0 -DENABLE_OPENCV=0 -DENABLE_TFLITE=0
 	$(MAKE) -C libcamera-apps/build libcamera_app
 
-libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-apps/build/core/libcamera_app.so
+QR-Code-generator/cpp/qrcodegen.o:
+	$(MAKE) -C QR-Code-generator/cpp
+
+libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
 	gcc \
 	  -std=gnu++17 \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
@@ -36,6 +39,7 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/GUI \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
 	  -I ./libcamera-apps \
+	  -I ./QR-Code-generator/cpp \
 	  -I /usr/include/libcamera \
 	  libcamera_eink.cpp \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
@@ -43,17 +47,26 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/GUI_Paint.o \
 	  ./libcamera-apps/build/core/libcamera_app.so \
 	  ./libcamera-apps/build/image/libimages.so \
-	  -lbcm2835 \
-	  -lboost_program_options \
-	  -lbsd \
-	  -lcamera \
-	  -lcamera-base \
-	  -lexif \
-	  -ljpeg \
-	  -lpthread \
-	  -lstdc++ \
+	  ./QR-Code-generator/cpp/qrcodegen.o \
+	  -l bcm2835 \
+	  -l boost_program_options \
+	  -l bsd \
+	  -l camera \
+	  -l camera-base \
+	  -l exif \
+	  -l jpeg \
+	  -l pthread \
+	  -l stdc++ \
 	  -o libcamera-eink
 	strip libcamera-eink
+
+test:
+	gcc \
+	  -std=gnu++17 \
+	  ./tests/test_qr.cpp \
+	  -l stdc++ \
+	  -o ./tests/run
+	./tests/run
 
 clean:
 	$(MAKE) -s -C bcm2835-1.71 clean || true
