@@ -12,6 +12,17 @@ services:
     working_dir: /workdir
     tty: true
 
+  dev:
+    build:
+      context: .
+      args:
+        image: debian:bullseye
+    image: dev-libcamera-eink
+    volumes:
+      - ${PWD}:/workdir:rw
+    working_dir: /workdir
+    tty: true
+
   linter:
     build: .linter
     volumes:

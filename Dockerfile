@@ -1,4 +1,5 @@
-FROM arm32v5/debian:bullseye
+ARG image=arm32v5/debian:bullseye
+FROM ${image}
 
 RUN apt-get update && \
   apt-get install -y \
