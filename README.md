@@ -1,4 +1,4 @@
-# libcamera-eink
+# pi-camera
 
 ## Dependencies
 
