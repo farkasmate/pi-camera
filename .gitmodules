@@ -10,3 +10,6 @@
 [submodule "QR-Code-generator"]
 	path = QR-Code-generator
 	url = https://github.com/nayuki/QR-Code-generator.git
+[submodule "3d_print/PiSugar"]
+	path = 3d_print/PiSugar
+	url = git@github.com:PiSugar/PiSugar.git
