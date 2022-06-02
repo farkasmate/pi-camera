@@ -6,6 +6,7 @@ RUN apt-get update && \
     build-essential \
     cmake \
     git \
+    golang-go \
     libboost-program-options-dev \
     libbsd-dev \
     libexif-dev \
@@ -23,6 +24,6 @@ RUN apt-get update && \
     && \
   rm -rf /var/lib/apt/lists/*
 
-ENV LD_LIBRARY_PATH=libcamera-apps/build/core:libcamera-apps/build/image:libcamera-apps/build/preview:libcamera-apps/build/post_processing_stages
+ENV LD_LIBRARY_PATH=libcamera-apps/build/core:libcamera-apps/build/image:libcamera-apps/build/post_processing_stages:libcamera-apps/build/preview:libcamera/build/src/libcamera/base:libcamera/build/src/libcamera
 
 CMD ["make", "in_docker"]

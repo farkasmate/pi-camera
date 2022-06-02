@@ -20,6 +20,9 @@ bcm2835-1.71/src/libbcm2835.a:
 e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o:
 	$(MAKE) -C e-Paper/RaspberryPi_JetsonNano/c RPI
 
+google_photos_upload/google_photos_upload.a:
+	$(MAKE) -C google_photos_upload
+
 libcamera/build/src/libcamera/libcamera.so:
 	meson -Dprefix=/usr -Dlibdir=lib libcamera/build libcamera
 	meson compile -C libcamera/build
@@ -31,23 +34,25 @@ libcamera-apps/build/core/libcamera_app.so:
 QR-Code-generator/cpp/qrcodegen.o:
 	$(MAKE) -C QR-Code-generator/cpp
 
-libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
+libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upload/google_photos_upload.a libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
 	gcc \
 	  -std=gnu++17 \
+	  -I ./QR-Code-generator/cpp \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Fonts \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/GUI \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
+	  -I ./google_photos_upload \
 	  -I ./libcamera-apps \
-	  -I ./QR-Code-generator/cpp \
 	  -I /usr/include/libcamera \
 	  libcamera_eink.cpp \
+	  ./QR-Code-generator/cpp/qrcodegen.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/GUI_Paint.o \
+	  ./google_photos_upload/google_photos_upload.a \
 	  ./libcamera-apps/build/core/libcamera_app.so \
 	  ./libcamera-apps/build/image/libimages.so \
-	  ./QR-Code-generator/cpp/qrcodegen.o \
 	  -l bcm2835 \
 	  -l boost_program_options \
 	  -l bsd \
@@ -60,19 +65,8 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o libcamera-ap
 	  -o libcamera-eink
 	strip libcamera-eink
 
-test:
-	gcc \
-	  -D HEIGHT=150 \
-	  -D WIDTH=100 \
-	  -std=gnu++17 \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
-	  -I ./QR-Code-generator/cpp \
-	  ./tests/test_qr.cpp \
-	  ./QR-Code-generator/cpp/qrcodegen.o \
-	  -l stdc++ \
-	  -o ./tests/run
-	./tests/run
+test: pi-camera
+	$(MAKE) -C tests clean all
 
 clean:
 	$(MAKE) -s -C bcm2835-1.71 clean || true
