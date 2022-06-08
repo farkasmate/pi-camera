@@ -69,8 +69,6 @@ int main(int argc, char *argv[]) {
 
   create_pid_file();
 
-  eink_open();
-
   try {
     PiCameraApp app;
     StillOptions *options = app.GetOptions();
@@ -85,6 +83,8 @@ int main(int argc, char *argv[]) {
 
       if (options->verbose)
         options->Print();
+
+      eink_open();
 
       event_loop(app);
     }

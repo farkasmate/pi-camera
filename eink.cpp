@@ -15,6 +15,7 @@ extern "C" {
 // FIXME: remove globals
 UBYTE *Image;
 UWORD Imagesize = ((WIDTH % 8 == 0) ? (WIDTH / 8) : (WIDTH / 8 + 1)) * HEIGHT;
+bool is_eink_open = false;
 
 // clang-format off
 static const uint8_t bayer[8][8] = {
@@ -44,6 +45,8 @@ static void eink_open() {
 
   if (DEV_Module_Init() != 0)
     throw std::runtime_error("Failed to initialize eink module");
+
+  is_eink_open = true;
 }
 
 static void eink_draw_focus(int focus) {
@@ -66,10 +69,15 @@ static void eink_display_base() {
 static void eink_display_partial() { EPD_2IN13_V2_DisplayPart(Image); }
 
 static void eink_close() {
+  if (Image != NULL) {
+    free(Image);
+    Image = NULL;
+  }
+
+  if (!is_eink_open)
+    return;
+
   EPD_2IN13_V2_Sleep();
   EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
   DEV_Module_Exit();
-
-  free(Image);
-  Image = NULL;
 }
