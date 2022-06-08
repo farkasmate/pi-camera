@@ -74,13 +74,6 @@ int main(int argc, char *argv[]) {
     PiCameraOptions *options = app.GetOptions();
 
     if (options->Parse(argc, argv)) {
-      // hardcode options
-      // FIXME: rotation = 180
-      options->nopreview = true;
-      options->lores_width = 160;
-      options->lores_height = 122;
-      options->encoding = "yuv420";
-
       if (options->verbose)
         options->Print();
 
