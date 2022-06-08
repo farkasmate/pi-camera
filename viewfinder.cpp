@@ -2,9 +2,9 @@
 
 #include "core/frame_info.hpp"
 #include "core/libcamera_app.hpp"
-#include "core/still_options.hpp"
 
 #include "app.cpp"
+#include "options.cpp"
 
 // FIXME: remove globals
 bool shutter = false;
@@ -27,7 +27,7 @@ static void draw_viewfinder(UBYTE *image, std::vector<libcamera::Span<uint8_t>> 
 }
 
 static bool viewfinder_loop(PiCameraApp &app) {
-  StillOptions const *options = app.GetOptions();
+  Options const *options = app.GetOptions();
 
   app.ConfigureViewfinder();
   app.StartCamera();

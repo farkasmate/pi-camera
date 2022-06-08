@@ -3,9 +3,9 @@
 #include <chrono>
 
 #include "core/libcamera_app.hpp"
-#include "core/still_options.hpp"
-
 #include "image/image.hpp"
+
+#include "options.cpp"
 
 class PiCameraApp : public LibcameraApp {
 private:
@@ -15,9 +15,9 @@ private:
   Msg msg = Msg(MsgType::Quit);
 
 public:
-  PiCameraApp() : LibcameraApp(std::make_unique<StillOptions>()) {}
+  PiCameraApp() : LibcameraApp(std::make_unique<PiCameraOptions>()) {}
 
-  StillOptions *GetOptions() const { return static_cast<StillOptions *>(options_.get()); }
+  PiCameraOptions *GetOptions() const { return static_cast<PiCameraOptions *>(options_.get()); }
 
   Msg GetLatestMsg() {
     int tries = MSG_TRIES;

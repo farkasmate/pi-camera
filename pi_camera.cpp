@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 
   try {
     PiCameraApp app;
-    StillOptions *options = app.GetOptions();
+    PiCameraOptions *options = app.GetOptions();
 
     if (options->Parse(argc, argv)) {
       // hardcode options
@@ -84,9 +84,11 @@ int main(int argc, char *argv[]) {
       if (options->verbose)
         options->Print();
 
-      eink_open();
+      if (!options->headless)
+        eink_open();
 
-      event_loop(app);
+      if (options->capture)
+        event_loop(app);
     }
   } catch (std::exception const &e) {
     std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
