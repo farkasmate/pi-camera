@@ -7,7 +7,7 @@
 
 #include "image/image.hpp"
 
-class LibcameraEinkApp : public LibcameraApp {
+class PiCameraApp : public LibcameraApp {
 private:
   const int MSG_TRIES = 10;
   const std::chrono::milliseconds SLOW_MSG_THRESHOLD{10};
@@ -15,7 +15,7 @@ private:
   Msg msg = Msg(MsgType::Quit);
 
 public:
-  LibcameraEinkApp() : LibcameraApp(std::make_unique<StillOptions>()) {}
+  PiCameraApp() : LibcameraApp(std::make_unique<StillOptions>()) {}
 
   StillOptions *GetOptions() const { return static_cast<StillOptions *>(options_.get()); }
 

@@ -1,4 +1,4 @@
-all: libcamera-eink
+all: pi-camera
 
 deps: bcm2835-1.71/src/libbcm2835.a libcamera/build/src/libcamera/libcamera.so
 
@@ -7,8 +7,8 @@ install-deps: deps
 	meson install -C libcamera/build
 
 rebuild:
-	rm -f libcamera-eink
-	$(MAKE) libcamera-eink
+	rm -f pi-camera
+	$(MAKE) pi-camera
 
 in_docker: install-deps rebuild
 
@@ -34,7 +34,7 @@ libcamera-apps/build/core/libcamera_app.so:
 QR-Code-generator/cpp/qrcodegen.o:
 	$(MAKE) -C QR-Code-generator/cpp
 
-libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upload/google_photos_upload.a libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
+pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upload/google_photos_upload.a libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
 	gcc \
 	  -std=gnu++17 \
 	  -I ./QR-Code-generator/cpp \
@@ -45,7 +45,7 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photo
 	  -I ./google_photos_upload \
 	  -I ./libcamera-apps \
 	  -I /usr/include/libcamera \
-	  libcamera_eink.cpp \
+	  pi_camera.cpp \
 	  ./QR-Code-generator/cpp/qrcodegen.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o \
@@ -62,8 +62,8 @@ libcamera-eink: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photo
 	  -l jpeg \
 	  -l pthread \
 	  -l stdc++ \
-	  -o libcamera-eink
-	strip libcamera-eink
+	  -o pi-camera
+	strip pi-camera
 
 test: pi-camera
 	$(MAKE) -C tests clean all
@@ -73,4 +73,4 @@ clean:
 	$(MAKE) -s -C e-Paper/RaspberryPi_JetsonNano/c clean || true
 	rm -rf libcamera-apps/build
 	rm -rf libcamera/build
-	rm -f libcamera-eink
+	rm -f pi-camera

@@ -6,7 +6,7 @@ services:
 
   builder:
     build: .
-    image: build-libcamera-eink
+    image: pi-camera-build
     volumes:
       - ${PWD}:/workdir:rw
     working_dir: /workdir
@@ -17,7 +17,7 @@ services:
       context: .
       args:
         image: debian:bullseye
-    image: dev-libcamera-eink
+    image: pi-camera-dev
     command: make in_docker test
     volumes:
       - ${PWD}:/workdir:rw

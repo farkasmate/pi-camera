@@ -12,8 +12,8 @@
 
 #include <bsd/libutil.h>
 
+#include "app.cpp"
 #include "eink.cpp"
-#include "libcamera_eink_app.cpp"
 #include "qr.cpp"
 #include "viewfinder.cpp"
 
@@ -24,7 +24,7 @@ struct pidfh *pid;
 
 // The main event loop for the application.
 
-static void event_loop(LibcameraEinkApp &app) {
+static void event_loop(PiCameraApp &app) {
   app.OpenCamera();
 
   bool ready_to_save_still = viewfinder_loop(app);
@@ -52,7 +52,7 @@ static void sigusr1_handler(int signo) { shutter = true; }
 
 static void create_pid_file() {
 
-  pid = pidfile_open("/var/run/libcamera_eink.pid", 0600, NULL);
+  pid = pidfile_open("/var/run/pi_camera.pid", 0600, NULL);
 
   if (pid == NULL && errno == EEXIST) {
     std::cerr << "can't lock PID file" << std::endl;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
   eink_open();
 
   try {
-    LibcameraEinkApp app;
+    PiCameraApp app;
     StillOptions *options = app.GetOptions();
 
     if (options->Parse(argc, argv)) {

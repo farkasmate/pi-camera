@@ -1,4 +1,4 @@
 *.swp
 .DS_Store
 bcm2835-1.71/
-libcamera-eink
+pi-camera
