@@ -3,14 +3,15 @@
 #include "image/image.hpp"
 
 #include "app.hpp"
-#include "google_photos_upload/google_photos_upload.h"
 
 #include "viewfinder.cpp"
 
 void PiCameraApp::Capture() {
   OpenCamera();
 
-  bool ready_to_save_still = viewfinder_loop(*this);
+  Viewfinder viewfinder = Viewfinder(this);
+
+  bool ready_to_save_still = viewfinder.Start();
 
   if (!ready_to_save_still)
     throw std::runtime_error("Can't save photo");
@@ -19,8 +20,6 @@ void PiCameraApp::Capture() {
 
   // DO NOT call CloseCamera() explicitly
 }
-
-PiCameraOptions *PiCameraApp::GetOptions() const { return static_cast<PiCameraOptions *>(options_.get()); }
 
 LibcameraApp::Msg PiCameraApp::GetLatestMsg() {
   int tries = MSG_TRIES;

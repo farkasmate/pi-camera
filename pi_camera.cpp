@@ -12,23 +12,30 @@
 
 #include <bsd/libutil.h>
 
+#include "qrcodegen.hpp"
+
+#include "google_photos_upload/google_photos_upload.h"
+
 #include "app.cpp"
 #include "eink.cpp"
 #include "qr.cpp"
 
-#include "qrcodegen.hpp"
-
 // FIXME: remove globals
 struct pidfh *pid;
+PiCameraApp *app;
 
 static void sigint_handler(int signo) {
-  eink_close();
   pidfile_remove(pid);
 
   exit(1);
 }
 
-static void sigusr1_handler(int signo) { shutter = true; }
+static void sigusr1_handler(int signo) {
+  if (app == NULL)
+    return;
+
+  app->PressShutter();
+}
 
 static void create_pid_file() {
 
@@ -50,34 +57,30 @@ int main(int argc, char *argv[]) {
   create_pid_file();
 
   try {
-    PiCameraApp app;
-    PiCameraOptions *options = app.GetOptions();
+    app = new PiCameraApp(argc, argv);
+    PiCameraOptions *options = app->GetOptions();
 
-    if (options->Parse(argc, argv)) {
-      if (options->verbose)
-        options->Print();
+    if (app->IsQueryOnly())
+      return -1;
 
-      if (!options->headless)
-        eink_open();
+    if (options->verbose)
+      options->Print();
 
-      if (options->auth)
-        authenticate();
+    if (options->auth)
+      authenticate();
 
-      if (options->capture)
-        app.Capture();
-    }
+    if (options->capture)
+      app->Capture();
+
+    const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
+    draw_qr(app->GetBuffer(), qr);
+    app->Show();
   } catch (std::exception const &e) {
     std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
-    eink_close();
 
-    return -1;
+    return -2;
   }
 
-  const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
-  draw_qr(Image, qr);
-  eink_display_partial();
-
-  eink_close();
   pidfile_remove(pid);
 
   return 0;
