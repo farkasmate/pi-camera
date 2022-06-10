@@ -5,24 +5,35 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/v2"
 )
 
-func config() *oauth2.Config {
-	data, err := ioutil.ReadFile("./client_secret.json")
+// FIXME
+var configFile string
+var tokenFile string
+
+func config(path string) *oauth2.Config {
+	if _, err := os.Stat(path); err != nil && errors.Is(err, os.ErrNotExist) {
+		log.Fatal(path, " not found. Follow instructions and download credentials in JSON format: https://gphotosuploader.github.io/gphotos-uploader-cli/#/configuration?id=apiappcredentials")
+	}
+
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal("12 ", err)
+		log.Fatal(err)
 	}
 	conf, err := google.ConfigFromJSON(data, gphotos.PhotoslibraryScope)
 	if err != nil {
-		log.Fatal("13 ", err)
+		log.Fatal(err)
 	}
 
 	return conf
@@ -54,7 +65,7 @@ func googleAuth(conf oauth2.Config) *oauth2.Token {
 
 	token, err := conf.Exchange(ctx, code)
 	if err != nil {
-		log.Fatal("11 ", err)
+		log.Fatal(err)
 	}
 
 	return token
@@ -64,17 +75,21 @@ func randomString(n int) string {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 	if err != nil {
-		log.Fatal("31 ", err)
+		log.Fatal(err)
 	}
 
 	s := base64.StdEncoding.EncodeToString(b)
 	return string(s[:n])
 }
 
-func readToken() *oauth2.Token {
-	data, err := ioutil.ReadFile("./test_token.json")
+func readToken(path string) *oauth2.Token {
+	if _, err := os.Stat(path); err != nil && errors.Is(err, os.ErrNotExist) {
+		log.Fatal(path, " not found. Pass `--auth` to generate a new token.")
+	}
+
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal("12 ", err)
+		log.Fatal(err)
 	}
 	var token *oauth2.Token
 	err = json.Unmarshal(data, &token)
@@ -85,36 +100,36 @@ func readToken() *oauth2.Token {
 	return token
 }
 
-func writeToken(token *oauth2.Token) {
+func writeToken(path string, token *oauth2.Token) {
 	j, err := json.Marshal(token)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(string(j))
 
-	err = ioutil.WriteFile("./test_token.json", j, 0644)
+	err = ioutil.WriteFile(path, j, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func Authenticate() {
-	conf := config()
+	conf := config(configFile)
 	token := googleAuth(*conf)
 
-	writeToken(token)
+	writeToken(tokenFile, token)
 }
 
-func UploadTestImage(albumName string, imagePath string) {
+func UploadImage(albumName string, imagePath string) {
 	ctx := context.Background()
 
-	token := readToken()
+	token := readToken(tokenFile)
 
-	conf := config()
+	conf := config(configFile)
 	tc := conf.Client(ctx, token)
 	client, err := gphotos.NewClient(tc)
 	if err != nil {
-		log.Fatal("4 ", err)
+		log.Fatal(err)
 	}
 
 	log.Print("uploading file...")
@@ -123,10 +138,15 @@ func UploadTestImage(albumName string, imagePath string) {
 	//media, err :=  client.UploadFileToLibrary(ctx, "/go/src/test.jpg")
 	media, err := client.UploadFileToAlbum(ctx, album.ID, imagePath)
 	if err != nil {
-		log.Fatal("5 ", err)
+		log.Fatal(err)
 	}
 
 	log.Print("DONE")
 
 	log.Print("URL: ", media.ProductURL)
+}
+
+func SetConfig(configDir string) {
+	configFile = filepath.Join(configDir, "client_secret.json")
+	tokenFile = filepath.Join(configDir, "token.json")
 }

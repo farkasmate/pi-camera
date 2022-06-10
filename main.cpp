@@ -14,10 +14,9 @@
 
 #include "qrcodegen.hpp"
 
-#include "google_photos_upload/google_photos_upload.h"
-
 #include "app.cpp"
 #include "eink.cpp"
+#include "google_photos.cpp"
 #include "qr.cpp"
 
 // FIXME: remove globals
@@ -60,6 +59,10 @@ int main(int argc, char *argv[]) {
     app = new PiCameraApp(argc, argv);
     PiCameraOptions *options = app->GetOptions();
 
+    // FIXME
+    char config_dir[] = "./.pi-camera";
+    GooglePhotos gphotos = GooglePhotos(config_dir);
+
     if (app->IsQueryOnly())
       return -1;
 
@@ -67,7 +70,7 @@ int main(int argc, char *argv[]) {
       options->Print();
 
     if (options->auth)
-      authenticate();
+      gphotos.Authenticate();
 
     if (options->capture)
       app->Capture();

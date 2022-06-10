@@ -2,12 +2,17 @@ package main
 
 import "C"
 
-//export authenticate
-func authenticate() {
+//export google_photos_authenticate
+func google_photos_authenticate() {
 	Authenticate()
 }
 
-//export upload_test_image
-func upload_test_image(album_name *C.char, image_path *C.char) {
-	UploadTestImage(C.GoString(album_name), C.GoString(image_path))
+//export google_photos_set_config
+func google_photos_set_config(config_dir *C.char) {
+	SetConfig(C.GoString(config_dir))
+}
+
+//export google_photos_upload_image
+func google_photos_upload_image(album_name *C.char, image_path *C.char) {
+	UploadImage(C.GoString(album_name), C.GoString(image_path))
 }
