@@ -29,10 +29,10 @@ struct PiCameraOptions : public StillOptions {
 
     // hardcode options
     // FIXME: rotation = 180
-    this->nopreview = true;
-    this->lores_width = 160;
-    this->lores_height = 122;
-    this->encoding = "yuv420";
+    nopreview = true;
+    lores_width = 160;
+    lores_height = 122;
+    encoding = "yuv420";
 
     return true;
   }

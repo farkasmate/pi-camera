@@ -42,7 +42,6 @@ pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upl
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Fonts \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/GUI \
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
-	  -I ./google_photos_upload \
 	  -I ./libcamera-apps \
 	  -I /usr/include/libcamera \
 	  pi_camera.cpp \

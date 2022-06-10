@@ -3,7 +3,8 @@
 #include "core/frame_info.hpp"
 #include "core/libcamera_app.hpp"
 
-#include "app.cpp"
+#include "app.hpp"
+
 #include "options.cpp"
 
 // FIXME: remove globals

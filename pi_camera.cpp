@@ -15,31 +15,11 @@
 #include "app.cpp"
 #include "eink.cpp"
 #include "qr.cpp"
-#include "viewfinder.cpp"
 
 #include "qrcodegen.hpp"
 
 // FIXME: remove globals
 struct pidfh *pid;
-
-// The main event loop for the application.
-
-static void event_loop(PiCameraApp &app) {
-  app.OpenCamera();
-
-  bool ready_to_save_still = viewfinder_loop(app);
-
-  if (!ready_to_save_still)
-    throw std::runtime_error("Can't save photo");
-
-  app.SaveStill();
-
-  const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
-  draw_qr(Image, qr);
-  eink_display_partial();
-
-  // DO NOT call app.CloseCamera() explicitly
-}
 
 static void sigint_handler(int signo) {
   eink_close();
@@ -80,8 +60,11 @@ int main(int argc, char *argv[]) {
       if (!options->headless)
         eink_open();
 
+      if (options->auth)
+        authenticate();
+
       if (options->capture)
-        event_loop(app);
+        app.Capture();
     }
   } catch (std::exception const &e) {
     std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
@@ -89,6 +72,10 @@ int main(int argc, char *argv[]) {
 
     return -1;
   }
+
+  const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
+  draw_qr(Image, qr);
+  eink_display_partial();
 
   eink_close();
   pidfile_remove(pid);
