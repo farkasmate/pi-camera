@@ -30,6 +30,8 @@ struct PiCameraOptions : public StillOptions {
     // hardcode options
     // FIXME: rotation = 180
     nopreview = true;
+    // FIXME
+    output = "./pi_camera_" + std::to_string(std::time(0)) + ".jpg";
     lores_width = 160;
     lores_height = 122;
     encoding = "yuv420";

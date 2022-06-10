@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <csignal>
+#include <filesystem>
 
 #include <bsd/libutil.h>
 
@@ -74,6 +75,12 @@ int main(int argc, char *argv[]) {
 
     if (options->capture)
       app->Capture();
+
+    if (options->upload && (options->output != "") && std::filesystem::exists(options->output)) {
+      // FIXME
+      char album_name[] = "pi-camera-test";
+      gphotos.UploadImage(album_name, options->output.data());
+    }
 
     const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
     draw_qr(app->GetBuffer(), qr);
