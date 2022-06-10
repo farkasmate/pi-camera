@@ -44,7 +44,7 @@ pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upl
 	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
 	  -I ./libcamera-apps \
 	  -I /usr/include/libcamera \
-	  pi_camera.cpp \
+	  main.cpp \
 	  ./QR-Code-generator/cpp/qrcodegen.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
 	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o \
