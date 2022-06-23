@@ -67,6 +67,9 @@ pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upl
 test: pi-camera
 	$(MAKE) -C tests clean all
 
+test-menu: install-deps
+	${MAKE} -C menu
+
 clean:
 	$(MAKE) -s -C bcm2835-1.71 clean || true
 	$(MAKE) -s -C e-Paper/RaspberryPi_JetsonNano/c clean || true
