@@ -7,8 +7,6 @@
 #include "viewfinder.cpp"
 
 void PiCameraApp::Capture() {
-  OpenCamera();
-
   Viewfinder viewfinder = Viewfinder(this);
 
   bool ready_to_save_still = viewfinder.Start();

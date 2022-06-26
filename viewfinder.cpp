@@ -1,6 +1,8 @@
 #include "core/frame_info.hpp"
 #include "core/libcamera_app.hpp"
 
+#include "eink/frame.hpp"
+
 #include "app.hpp"
 
 #include "options.cpp"
@@ -21,9 +23,10 @@ private:
   // clang-format on
 
   PiCameraApp *app;
+  Frame *frame;
   std::chrono::milliseconds timeout;
 
-  void Draw(uint8_t *buffer, std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info) {
+  void draw(std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const &info) {
     unsigned w = info.width, h = info.height, stride = info.stride;
     uint8_t *Y = (uint8_t *)mem[0].data();
 
@@ -31,23 +34,21 @@ private:
       for (uint8_t i = 0; i < w; i++) {
         uint8_t yValue = *(Y + j * stride + i);
 
-        // FIXME: draw bitmap in a "window"
-        if (yValue > 4 * bayer[j % 8][i % 8])
-          buffer[i * LINE_STRIDE + j / 8] |= 1UL << (7 - j % 8);
-        else
-          buffer[i * LINE_STRIDE + j / 8] &= ~(1UL << (7 - j % 8));
+        if (yValue < 4 * bayer[j % 8][i % 8])
+          frame->SetPixel(i, j);
       }
     }
   }
 
 public:
-  // FIXME
   Viewfinder(PiCameraApp *app) {
     this->app = app;
+    this->frame = app->GetFrame();
     this->timeout = std::chrono::milliseconds(app->GetOptions()->timeout);
   }
 
   bool Start() {
+    app->OpenCamera();
     app->ConfigureViewfinder();
     app->StartCamera();
 
@@ -89,11 +90,11 @@ public:
       StreamInfo info = app->GetStreamInfo(stream);
       const std::vector<libcamera::Span<uint8_t>> mem = app->Mmap(completed_request->buffers[stream]);
 
-      app->Clear();
-      app->DrawFocus(frame_info.focus);
-      app->DrawTime((now - start_time) / std::chrono::seconds(1));
+      frame->Clear();
+      frame->DrawText(160, 0, "FOCUS: " + std::to_string((int)frame_info.focus / 100));
+      frame->DrawText(160, 20, "TIME: " + std::to_string((now - start_time) / std::chrono::seconds(1)));
 
-      Draw(app->GetBuffer(), mem, info);
+      draw(mem, info);
 
       app->Show();
     }

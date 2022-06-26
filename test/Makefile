@@ -12,14 +12,12 @@ test_google_photos:
 
 test_qr:
 	gcc \
-	  -D HEIGHT=150 \
-	  -D WIDTH=100 \
 	  -std=gnu++17 \
-	  -I ../e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
-	  -I ../e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
 	  -I ../QR-Code-generator/cpp \
 	  ../QR-Code-generator/cpp/qrcodegen.o \
+	  ../eink/with_deps.o \
 	  ./test_qr.cpp \
+	  -l pthread \
 	  -l stdc++ \
 	  -o ./run_qr
 	./run_qr

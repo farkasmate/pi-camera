@@ -1,24 +1,7 @@
 all: pi-camera
 
-deps: bcm2835-1.71/src/libbcm2835.a libcamera/build/src/libcamera/libcamera.so
-
-install-deps: deps
-	$(MAKE) -C bcm2835-1.71 install
-	meson install -C libcamera/build
-
-rebuild:
-	rm -f pi-camera
-	$(MAKE) pi-camera
-
-in_docker: install-deps rebuild
-
-bcm2835-1.71/src/libbcm2835.a:
-	test -d bcm2835-1.71 || wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz -O - | tar xvz
-	cd bcm2835-1.71 && ./configure
-	$(MAKE) -C bcm2835-1.71
-
-e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o:
-	$(MAKE) -C e-Paper/RaspberryPi_JetsonNano/c RPI
+eink/with_deps.o:
+	$(MAKE) -C eink
 
 google_photos_upload/google_photos_upload.a:
 	$(MAKE) -C google_photos_upload
@@ -34,25 +17,21 @@ libcamera-apps/build/core/libcamera_app.so:
 QR-Code-generator/cpp/qrcodegen.o:
 	$(MAKE) -C QR-Code-generator/cpp
 
-pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upload/google_photos_upload.a libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
+pi-camera: eink/with_deps.o google_photos_upload/google_photos_upload.a libcamera-apps/build/core/libcamera_app.so QR-Code-generator/cpp/qrcodegen.o
 	gcc \
 	  -std=gnu++17 \
 	  -I ./QR-Code-generator/cpp \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Config \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/Fonts \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/GUI \
-	  -I ./e-Paper/RaspberryPi_JetsonNano/c/lib/e-Paper \
 	  -I ./libcamera-apps \
-	  -I /usr/include/libcamera \
+	  -I ./libcamera/build/include \
+	  -I ./libcamera/include \
 	  main.cpp \
 	  ./QR-Code-generator/cpp/qrcodegen.o \
-	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/DEV_Config.o \
-	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o \
-	  ./e-Paper/RaspberryPi_JetsonNano/c/bin/GUI_Paint.o \
+	  ./eink/with_deps.o \
 	  ./google_photos_upload/google_photos_upload.a \
 	  ./libcamera-apps/build/core/libcamera_app.so \
 	  ./libcamera-apps/build/image/libimages.so \
-	  -l bcm2835 \
+	  -L ./libcamera/build/src/libcamera \
+	  -L ./libcamera/build/src/libcamera/base \
 	  -l boost_program_options \
 	  -l bsd \
 	  -l camera \
@@ -65,14 +44,21 @@ pi-camera: e-Paper/RaspberryPi_JetsonNano/c/bin/EPD_2in13_V2.o google_photos_upl
 	strip pi-camera
 
 test: pi-camera
-	$(MAKE) -C tests clean all
+	$(MAKE) -C test clean all
 
 test-menu: install-deps
 	${MAKE} -C menu
 
+rebuild:
+	$(MAKE) -C eink rebuild
+	rm -f pi-camera
+	$(MAKE) pi-camera
+
 clean:
-	$(MAKE) -s -C bcm2835-1.71 clean || true
-	$(MAKE) -s -C e-Paper/RaspberryPi_JetsonNano/c clean || true
+	@echo -n "Are you sure to clean the whole project? [y/N] " && read ans && [ $${ans:-N} = y ]
+	$(MAKE) -C eink clean
+	rm -f pi-camera
 	rm -rf libcamera-apps/build
 	rm -rf libcamera/build
-	rm -f pi-camera
+
+.PHONY: test

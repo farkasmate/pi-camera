@@ -1,5 +1,5 @@
 [submodule "e-Paper"]
-	path = e-Paper
+	path = eink/e-Paper
 	url = https://github.com/waveshare/e-Paper.git
 [submodule "libcamera"]
 	path = libcamera

@@ -26,4 +26,4 @@ RUN apt-get update && \
 
 ENV LD_LIBRARY_PATH=libcamera-apps/build/core:libcamera-apps/build/image:libcamera-apps/build/post_processing_stages:libcamera-apps/build/preview:libcamera/build/src/libcamera/base:libcamera/build/src/libcamera
 
-CMD ["make", "in_docker"]
+CMD ["make", "rebuild"]

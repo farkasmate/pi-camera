@@ -14,12 +14,8 @@
 
 #include <bsd/libutil.h>
 
-#include "qrcodegen.hpp"
-
 #include "app.cpp"
-#include "eink.cpp"
 #include "google_photos.cpp"
-#include "qr.cpp"
 
 // FIXME: remove globals
 struct pidfh *pid;
@@ -82,10 +78,6 @@ int main(int argc, char *argv[]) {
       char album_name[] = "pi-camera-test";
       gphotos.UploadImage(album_name, options->output.data());
     }
-
-    const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText("https://indeed.sch.bme.hu/web/latest.jpg", qrcodegen::QrCode::Ecc::HIGH);
-    draw_qr(app->GetBuffer(), qr);
-    app->Show();
   } catch (std::exception const &e) {
     std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
 
