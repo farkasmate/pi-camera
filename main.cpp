@@ -10,6 +10,7 @@
 #include <chrono>
 #include <csignal>
 #include <filesystem>
+#include <iostream>
 
 #include <bsd/libutil.h>
 

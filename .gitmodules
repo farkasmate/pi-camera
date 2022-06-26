@@ -8,6 +8,7 @@
 	path = libcamera-apps
 	url = https://github.com/raspberrypi/libcamera-apps.git
 [submodule "QR-Code-generator"]
+	ignore = untracked
 	path = QR-Code-generator
 	url = https://github.com/nayuki/QR-Code-generator.git
 [submodule "3d_print/PiSugar"]
