@@ -63,15 +63,21 @@ Eink::~Eink() {
   DEV_Module_Exit();
 }
 
-void Eink::Display() {
+std::thread* Eink::Display() {
   if (is_headless)
-    return;
+    return NULL;
 
   if (!is_initialized)
-    return;
+    return NULL;
 
   std::thread *display_thread = new std::thread(&Eink::displayInTheBackground, this);
-  display_thread->detach();
+
+  if (is_partial) {
+    display_thread->detach();
+    return NULL;
+  }
+
+  return display_thread;
 }
 
 void Eink::SetPartial(bool partial) {

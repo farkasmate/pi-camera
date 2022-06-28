@@ -16,6 +16,9 @@ void PiCameraApp::Capture() {
 
   SaveStill();
 
+  eink->SetPartial(false);
+  Show(true);
+
   // DO NOT call CloseCamera() explicitly
 }
 
@@ -71,6 +74,13 @@ void PiCameraApp::SaveStill() {
   jpeg_save(mem, info, payload->metadata, filename, CameraId(), GetOptions());
 
   return;
+}
+
+void PiCameraApp::Show(bool wait) {
+  std::thread *display_thread = eink->Display();
+
+  if (wait && display_thread != NULL)
+    display_thread->join();
 }
 
 LibcameraApp::Msg PiCameraApp::Wait() {

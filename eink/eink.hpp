@@ -25,7 +25,7 @@ public:
 
   Frame* GetFrame() { return &frame; }
 
-  void Display();
+  std::thread* Display();
 
   void SetPartial(bool partial);
 };

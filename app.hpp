@@ -44,7 +44,7 @@ public:
 
   void SaveStill();
 
-  void Show() { eink->Display(); }
+  void Show(bool wait = false);
 
   Msg Wait();
 };
