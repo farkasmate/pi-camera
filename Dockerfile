@@ -14,6 +14,7 @@ RUN apt-get update && \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
+    libturbojpeg0-dev \
     meson \
     pkg-config \
     python3-jinja2 \
@@ -24,6 +25,6 @@ RUN apt-get update && \
     && \
   rm -rf /var/lib/apt/lists/*
 
-ENV LD_LIBRARY_PATH=libcamera-apps/build/core:libcamera-apps/build/image:libcamera-apps/build/post_processing_stages:libcamera-apps/build/preview:libcamera/build/src/libcamera/base:libcamera/build/src/libcamera
+ENV LD_LIBRARY_PATH=libcamera/build/src/libcamera/base:libcamera/build/src/libcamera
 
 CMD ["make", "rebuild"]

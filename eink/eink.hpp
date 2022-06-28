@@ -8,24 +8,24 @@
 // Waveshare 2.13" EDP (250x122 rotated 270 degrees)
 class Eink {
 private:
-  Frame frame;
+  Frame current_frame;
+  Frame next_frame;
 
-  bool is_headless;
+  bool is_in_shutdown;
   bool is_initialized;
-  bool is_partial;
 
+  std::thread *display_thread;
   std::mutex mutex;
 
   void initialize();
   void displayInTheBackground();
 
 public:
-  Eink(bool headless, bool partial);
+  Eink();
   ~Eink();
 
-  Frame* GetFrame() { return &frame; }
+  void Display(Frame *frame);
 
-  std::thread* Display();
-
-  void SetPartial(bool partial);
+  void Start();
+  void Stop();
 };

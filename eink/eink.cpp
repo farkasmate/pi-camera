@@ -19,12 +19,10 @@ void Eink::initialize() {
   if (DEV_Module_Init() != 0)
     throw std::runtime_error("Failed to initialize eink module");
 
+  // NOTE: Initialize as partial
   EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
-
-  if (is_partial) {
-    EPD_2IN13_V2_DisplayPartBaseImage(frame.GetBuffer());
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
-  }
+  EPD_2IN13_V2_DisplayPartBaseImage(current_frame.GetBuffer());
+  EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
 
   is_initialized = true;
 
@@ -32,68 +30,55 @@ void Eink::initialize() {
 }
 
 void Eink::displayInTheBackground() {
-  if (is_partial) {
-    if (!mutex.try_lock())
-      return;
-
-    EPD_2IN13_V2_DisplayPart(frame.GetBuffer());
-  }
-  else {
+  while (true) {
     mutex.lock();
+    memcpy(current_frame.GetBuffer(), next_frame.GetBuffer(), current_frame.Size());
+    mutex.unlock();
 
-    EPD_2IN13_V2_Display(frame.GetBuffer());
+    if (is_in_shutdown) {
+      EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
+      EPD_2IN13_V2_Display(current_frame.GetBuffer());
+
+      return;
+    }
+
+    EPD_2IN13_V2_DisplayPart(current_frame.GetBuffer());
   }
+}
+
+Eink::Eink() {
+  display_thread = NULL;
+
+  // FIXME: Do it in a background thread
+  initialize();
+}
+
+Eink::~Eink() {
+  if (display_thread != NULL)
+    Stop();
+}
+
+void Eink::Display(Frame *frame) {
+  mutex.lock();
+
+  memcpy(next_frame.GetBuffer(), frame->GetBuffer(), next_frame.Size());
 
   mutex.unlock();
 }
 
-Eink::Eink(bool headless, bool partial) {
-  is_headless = headless;
-  is_partial = partial;
-
-  if (!is_headless)
-    initialize();
-}
-
-Eink::~Eink() {
-  if (is_headless)
+void Eink::Start() {
+  if (display_thread != NULL)
     return;
 
-  SetPartial(false);
-  DEV_Module_Exit();
+  display_thread = new std::thread(&Eink::displayInTheBackground, this);
 }
 
-std::thread* Eink::Display() {
-  if (is_headless)
-    return NULL;
-
-  if (!is_initialized)
-    return NULL;
-
-  std::thread *display_thread = new std::thread(&Eink::displayInTheBackground, this);
-
-  if (is_partial) {
-    display_thread->detach();
-    return NULL;
-  }
-
-  return display_thread;
-}
-
-void Eink::SetPartial(bool partial) {
-  if (is_partial == partial)
-    return;
+void Eink::Stop() {
+  is_in_shutdown = true;
+  display_thread->join();
 
   mutex.lock();
-
-  is_partial = partial;
-
-  if (is_partial) {
-    EPD_2IN13_V2_DisplayPartBaseImage(frame.GetBuffer());
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
-  }
-  else
-    EPD_2IN13_V2_Init(EPD_2IN13_V2_FULL);
-
+  display_thread = NULL;
+  DEV_Module_Exit();
   mutex.unlock();
 }

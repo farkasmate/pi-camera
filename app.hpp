@@ -1,50 +1,58 @@
 #pragma once
 
-#include "core/libcamera_app.hpp"
+#include <libcamera/libcamera.h>
 
 #include "eink/eink.hpp"
-#include "eink/frame.hpp"
 
-#include "options.cpp"
+using namespace libcamera;
 
-class PiCameraApp : public LibcameraApp {
+class PiCameraApp {
 private:
-  const int MSG_TRIES = 10;
-  const std::chrono::milliseconds SLOW_MSG_THRESHOLD{10};
+  enum PiCameraStream {
+    VIEWFINDER,
+    STILL,
+  };
 
-  Eink *eink;
-  Msg msg = Msg(MsgType::Quit);
+  struct StreamMetadata {
+    StreamConfiguration *config;
+    uint8_t *data;
+    int size;
+  };
 
-  bool is_query_only = false;
-  bool is_shutter_pressed = false;
+  static Eink eink;
+  static Frame frame;
+
+  static bool is_shutter_pressed;
+  static std::thread *save_thread;
+
+  static std::shared_ptr<Camera> camera;
+  static std::map<PiCameraStream, StreamMetadata> streams;
+
+  std::unique_ptr<CameraManager> camera_manager;
+  FrameBufferAllocator *allocator;
+  std::shared_ptr<libcamera::Request> prepared_request;
+
+  void configureCamera();
 
 public:
-  PiCameraApp(int argc, char *argv[]) : LibcameraApp(std::make_unique<PiCameraOptions>()) {
-    is_query_only = !options_->Parse(argc, argv);
+  PiCameraApp();
+  ~PiCameraApp();
 
-    if (!is_query_only)
-      eink = new Eink(GetOptions()->headless, true);
-  }
+  static void requestComplete(Request *request);
+  static void drawViewfinder(int focus);
+  static void saveJpeg();
 
-  void Capture();
+  bool IsShutterPressed() { return (is_shutter_pressed && (save_thread != NULL)); }
+  void pressShutter() { is_shutter_pressed = true; }
 
-  Frame* GetFrame() { return eink->GetFrame(); }
-
-  PiCameraOptions* GetOptions() const { return static_cast<PiCameraOptions *>(options_.get()); }
-
-  Msg GetLatestMsg();
-
-  bool IsRequestComplete();
-
-  bool IsQueryOnly() { return is_query_only; }
-
-  bool IsShutterPressed() { return is_shutter_pressed; }
-
-  void PressShutter() { is_shutter_pressed = true; }
-
-  void SaveStill();
-
-  void Show(bool wait = false);
-
-  Msg Wait();
+  void Run();
 };
+
+Eink PiCameraApp::eink;
+Frame PiCameraApp::frame;
+
+bool PiCameraApp::is_shutter_pressed;
+std::thread *PiCameraApp::save_thread;
+
+std::shared_ptr<Camera> PiCameraApp::camera;
+std::map<PiCameraApp::PiCameraStream, PiCameraApp::StreamMetadata> PiCameraApp::streams;

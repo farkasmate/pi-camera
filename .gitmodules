@@ -4,9 +4,6 @@
 [submodule "libcamera"]
 	path = libcamera
 	url = https://git.libcamera.org/libcamera/libcamera.git
-[submodule "libcamera-apps"]
-	path = libcamera-apps
-	url = https://github.com/raspberrypi/libcamera-apps.git
 [submodule "QR-Code-generator"]
 	ignore = untracked
 	path = QR-Code-generator

@@ -1,90 +1,58 @@
-/* SPDX-License-Identifier: BSD-2-Clause */
-/*
- * Copyright (C) 2020, Raspberry Pi (Trading) Ltd.
- *
- * Based on:
- *   libcamera_hello.cpp - libcamera "hello world" app.
- *   libcamera_still.cpp - libcamera stills capture app.
- */
-
-#include <chrono>
-#include <csignal>
-#include <filesystem>
 #include <iostream>
-
-#include <bsd/libutil.h>
+#include <bsd/libutil.h> // pid file
+#include <csignal>       // signals
+#include <unistd.h>      // sleep
 
 #include "app.cpp"
-#include "google_photos.cpp"
 
-// FIXME: remove globals
 struct pidfh *pid;
-PiCameraApp *app;
+PiCameraApp app;
 
-static void sigint_handler(int signo) {
-  pidfile_remove(pid);
+void sig_handler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      pidfile_remove(pid);
+      exit(EXIT_FAILURE);
+      break;
 
-  exit(1);
-}
+    case SIGUSR1:
+      app.pressShutter();
+      break;
 
-static void sigusr1_handler(int signo) {
-  if (app == NULL)
-    return;
+    case SIGUSR2:
+      // TODO
+      break;
 
-  app->PressShutter();
-}
-
-static void create_pid_file() {
-
-  pid = pidfile_open("/var/run/pi_camera.pid", 0600, NULL);
-
-  if (pid == NULL && errno == EEXIST) {
-    std::cerr << "can't lock PID file" << std::endl;
-
-    exit(2);
+    default:
+      throw std::runtime_error("Unhandled signal: " + sig);
+      break;
   }
-
-  pidfile_write(pid);
 }
 
 int main(int argc, char *argv[]) {
-  std::signal(SIGINT, sigint_handler);
-  std::signal(SIGUSR1, sigusr1_handler);
+  std::signal(SIGINT, sig_handler);
+  std::signal(SIGUSR1, sig_handler);
+  //std::signal(SIGUSR2, sig_handler);
 
-  create_pid_file();
+  pid = pidfile_open("/var/run/pi_camera.pid", 0600, NULL);
 
-  try {
-    app = new PiCameraApp(argc, argv);
-    PiCameraOptions *options = app->GetOptions();
+  if (errno == EACCES)
+    throw std::runtime_error("Failed to lock pidfile");
 
-    // FIXME
-    char config_dir[] = "./.pi-camera";
-    GooglePhotos gphotos = GooglePhotos(config_dir);
+  pidfile_write(pid);
 
-    if (app->IsQueryOnly())
-      return -1;
+  app.Run();
 
-    if (options->verbose)
-      options->Print();
+  while (true) {
+    if (app.IsShutterPressed())
+      break;
 
-    if (options->auth)
-      gphotos.Authenticate();
-
-    if (options->capture)
-      app->Capture();
-
-    if (options->upload && (options->output != "") && std::filesystem::exists(options->output)) {
-      // FIXME
-      char album_name[] = "pi-camera-test";
-      gphotos.UploadImage(album_name, options->output.data());
-    }
-  } catch (std::exception const &e) {
-    std::cerr << "ERROR: *** " << e.what() << " ***" << std::endl;
-
-    return -2;
+    std::cerr << "Sleeping 1s..." << std::endl;
+    sleep(1);
   }
 
   pidfile_remove(pid);
+  pid = NULL;
 
-  return 0;
+  return EXIT_SUCCESS;
 }

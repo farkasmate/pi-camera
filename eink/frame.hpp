@@ -20,6 +20,7 @@ public:
   int GetWidth() { return WIDTH; }
   int GetHeight() { return HEIGHT; }
   uint8_t* GetBuffer() { return buffer; }
+  int Size() { return BUFFER_SIZE; }
 
   void Clear();
   void DrawText(int x, int y, std::string text);
