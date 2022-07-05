@@ -36,7 +36,6 @@ private:
 
 public:
   PiCameraApp();
-  ~PiCameraApp();
 
   static void requestComplete(Request *request);
   static void drawViewfinder(int focus);
@@ -45,7 +44,8 @@ public:
   bool IsShutterPressed() { return (is_shutter_pressed && (save_thread != NULL)); }
   void pressShutter() { is_shutter_pressed = true; }
 
-  void Run();
+  void Start();
+  void Stop();
 };
 
 Eink PiCameraApp::eink;

@@ -7,63 +7,6 @@
 
 PiCameraApp::PiCameraApp() {
   save_thread = NULL;
-
-  // FIXME: Initialize
-  eink.Start();
-
-  camera_manager = std::make_unique<CameraManager>();
-  camera_manager->start();
-
-  if (camera_manager->cameras().empty())
-    throw std::runtime_error("No cameras");
-
-  camera = camera_manager->cameras()[0];
-  allocator = new FrameBufferAllocator(camera);
-
-  camera->acquire();
-
-  if (camera->streams().size() < 2)
-    throw std::runtime_error("Not enough streams");
-
-  configureCamera();
-
-  prepared_request = camera->createRequest();
-
-  for (auto &[key, metadata] : streams) {
-    if (allocator->allocate(metadata.config->stream()) < 0)
-      throw std::runtime_error("Can't allocate buffers");
-
-    // NOTE: Single buffers only, RGB is single-plane, YUV420 has 3 planes, but we only need the first for monochrome image
-    const std::unique_ptr<FrameBuffer> &buffer = allocator->buffers(metadata.config->stream()).front();
-    const FrameBuffer::Plane plane = buffer->planes().front();
-
-    void *memory = mmap(NULL, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
-    metadata.data = static_cast<uint8_t *>(memory);
-    metadata.size = plane.length;
-
-    prepared_request->addBuffer(metadata.config->stream(), buffer.get());
-  }
-}
-
-PiCameraApp::~PiCameraApp() {
-  std::thread *eink_thread = new std::thread(&Eink::Stop, &eink);
-
-  if (save_thread != NULL)
-    save_thread->join();
-
-  eink_thread->join();
-
-  camera->stop();
-
-  for (auto &[key, metadata] : streams) {
-    munmap(metadata.data, metadata.size);
-    allocator->free(metadata.config->stream());
-  }
-
-  delete allocator;
-  camera->release();
-  camera.reset();
-  camera_manager->stop();
 }
 
 void PiCameraApp::configureCamera() {
@@ -170,8 +113,63 @@ void PiCameraApp::saveJpeg() {
   fclose(jpeg_file);
 }
 
-void PiCameraApp::Run() {
-std::cerr << "Running app..." << std::endl;
+void PiCameraApp::Start() {
+  eink.Start();
+
+  camera_manager = std::make_unique<CameraManager>();
+  camera_manager->start();
+
+  if (camera_manager->cameras().empty())
+    throw std::runtime_error("No cameras");
+
+  camera = camera_manager->cameras()[0];
+  allocator = new FrameBufferAllocator(camera);
+
+  camera->acquire();
+
+  if (camera->streams().size() < 2)
+    throw std::runtime_error("Not enough streams");
+
+  configureCamera();
+
+  prepared_request = camera->createRequest();
+
+  for (auto &[key, metadata] : streams) {
+    if (allocator->allocate(metadata.config->stream()) < 0)
+      throw std::runtime_error("Can't allocate buffers");
+
+    // NOTE: Single buffers only, RGB is single-plane, YUV420 has 3 planes, but we only need the first for monochrome image
+    const std::unique_ptr<FrameBuffer> &buffer = allocator->buffers(metadata.config->stream()).front();
+    const FrameBuffer::Plane plane = buffer->planes().front();
+
+    void *memory = mmap(NULL, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
+    metadata.data = static_cast<uint8_t *>(memory);
+    metadata.size = plane.length;
+
+    prepared_request->addBuffer(metadata.config->stream(), buffer.get());
+  }
+
   camera->start();
   camera->queueRequest(prepared_request.get());
+}
+
+void PiCameraApp::Stop() {
+  std::thread *eink_thread = new std::thread(&Eink::Stop, &eink);
+
+  if (save_thread != NULL)
+    save_thread->join();
+
+  eink_thread->join();
+
+  camera->stop();
+
+  for (auto &[key, metadata] : streams) {
+    munmap(metadata.data, metadata.size);
+    allocator->free(metadata.config->stream());
+  }
+
+  delete allocator;
+  camera->release();
+  camera.reset();
+  camera_manager->stop();
 }

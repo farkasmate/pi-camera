@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 #include <bsd/libutil.h> // pid file
 #include <csignal>       // signals
@@ -36,12 +37,12 @@ int main(int argc, char *argv[]) {
 
   pid = pidfile_open("/var/run/pi_camera.pid", 0600, NULL);
 
-  if (errno == EACCES)
-    throw std::runtime_error("Failed to lock pidfile");
+  if (pid == NULL)
+    throw std::runtime_error("Failed to lock pidfile: " + std::string(std::strerror(errno)));
 
   pidfile_write(pid);
 
-  app.Run();
+  app.Start();
 
   while (true) {
     if (app.IsShutterPressed())
@@ -50,6 +51,8 @@ int main(int argc, char *argv[]) {
     std::cerr << "Sleeping 1s..." << std::endl;
     sleep(1);
   }
+
+  app.Stop();
 
   pidfile_remove(pid);
   pid = NULL;
