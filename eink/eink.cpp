@@ -11,9 +11,6 @@ extern "C" {
 };
 
 void Eink::initialize() {
-  if (is_initialized)
-    return;
-
   mutex.lock();
 
   if (DEV_Module_Init() != 0)
@@ -24,12 +21,15 @@ void Eink::initialize() {
   EPD_2IN13_V2_DisplayPartBaseImage(current_frame.GetBuffer());
   EPD_2IN13_V2_Init(EPD_2IN13_V2_PART);
 
-  is_initialized = true;
-
   mutex.unlock();
 }
 
 void Eink::displayInTheBackground() {
+  if (init_thread != NULL) {
+    init_thread->join();
+    init_thread = NULL;
+  }
+
   while (true) {
     mutex.lock();
     memcpy(current_frame.GetBuffer(), next_frame.GetBuffer(), current_frame.Size());
@@ -48,9 +48,7 @@ void Eink::displayInTheBackground() {
 
 Eink::Eink() {
   display_thread = NULL;
-
-  // FIXME: Do it in a background thread
-  initialize();
+  init_thread = new std::thread(&Eink::initialize, this);
 }
 
 Eink::~Eink() {

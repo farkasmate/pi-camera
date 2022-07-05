@@ -12,9 +12,9 @@ private:
   Frame next_frame;
 
   bool is_in_shutdown;
-  bool is_initialized;
 
   std::thread *display_thread;
+  std::thread *init_thread;
   std::mutex mutex;
 
   void initialize();
