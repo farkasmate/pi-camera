@@ -17,6 +17,8 @@ services:
       context: .
       args:
         image: debian:bullseye
+    environment:
+      PI_CAMERA_HEADLESS: true
     image: pi-camera-dev
     command: make rebuild test
     volumes:

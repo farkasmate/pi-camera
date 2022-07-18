@@ -4,58 +4,54 @@
 #include <csignal>       // signals
 #include <unistd.h>      // sleep
 
+#include "eink/eink.hpp"
+#include "menu/menu.hpp"
+
 #include "app.cpp"
 
 struct pidfh *pid;
-PiCameraApp app;
+Eink eink;
+Menu menu(&eink);
+PiCameraApp app(&eink);
 
-void sig_handler(int sig) {
-  switch (sig) {
-    case SIGINT:
-      pidfile_remove(pid);
-      exit(EXIT_FAILURE);
+void pressShutter(int sig) { app.pressShutter(); }
+
+int main(int argc, char *argv[]) {
+  switch (menu.Parse(argc, argv)) {
+    case Menu::Option::CAPTURE:
+      std::cout << "CAPTURE" << std::endl;
+
+      std::signal(SIGUSR1, pressShutter);
+
+      app.Start();
+
+      while (true) {
+        if (app.IsShutterPressed())
+          break;
+
+        std::cerr << "Sleeping 1s..." << std::endl;
+        sleep(1);
+      }
+
+      app.Stop();
+
       break;
 
-    case SIGUSR1:
-      app.pressShutter();
+    case Menu::Option::SYNC:
+      std::cout << "TODO: SYNC" << std::endl;
       break;
 
-    case SIGUSR2:
-      // TODO
+    case Menu::Option::DEBUG:
+      std::cout << "TODO: DEBUG" << std::endl;
       break;
 
     default:
-      throw std::runtime_error("Unhandled signal: " + sig);
+      eink.Stop();
+      exit(EXIT_FAILURE);
       break;
   }
-}
 
-int main(int argc, char *argv[]) {
-  std::signal(SIGINT, sig_handler);
-  std::signal(SIGUSR1, sig_handler);
-  //std::signal(SIGUSR2, sig_handler);
-
-  pid = pidfile_open("/var/run/pi_camera.pid", 0600, NULL);
-
-  if (pid == NULL)
-    throw std::runtime_error("Failed to lock pidfile: " + std::string(std::strerror(errno)));
-
-  pidfile_write(pid);
-
-  app.Start();
-
-  while (true) {
-    if (app.IsShutterPressed())
-      break;
-
-    std::cerr << "Sleeping 1s..." << std::endl;
-    sleep(1);
-  }
-
-  app.Stop();
-
-  pidfile_remove(pid);
-  pid = NULL;
+  eink.Stop();
 
   return EXIT_SUCCESS;
 }

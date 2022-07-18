@@ -19,7 +19,7 @@ private:
     int size;
   };
 
-  static Eink eink;
+  static Eink *eink;
   static Frame frame;
 
   static bool is_shutter_pressed;
@@ -35,7 +35,7 @@ private:
   void configureCamera();
 
 public:
-  PiCameraApp();
+  PiCameraApp(Eink *eink);
 
   static void requestComplete(Request *request);
   static void drawViewfinder(int focus);
@@ -48,7 +48,7 @@ public:
   void Stop();
 };
 
-Eink PiCameraApp::eink;
+Eink *PiCameraApp::eink;
 Frame PiCameraApp::frame;
 
 bool PiCameraApp::is_shutter_pressed;

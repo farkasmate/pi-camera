@@ -7,7 +7,7 @@
           -e '/\(STARTCHAR\|ENCODING\|SWIDTH\|DWIDTH\|BBX\|BITMAP\|ENDCHAR\)/d' \
           -e 's/\(^.*$\)/0X\1,/'
 
-   For licensing see: OFL.TXT
+   For licensing see: terminus_OFL.TXT
 */
 
 #include "fonts.h"

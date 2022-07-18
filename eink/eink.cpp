@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cstdlib>
 #include <stdexcept>
 #include <vector>
@@ -24,6 +25,20 @@ void Eink::initialize() {
   mutex.unlock();
 }
 
+void Eink::displayHeadless() {
+  while (true) {
+    mutex.lock();
+    memcpy(current_frame.GetBuffer(), next_frame.GetBuffer(), current_frame.Size());
+    mutex.unlock();
+
+    if (is_in_shutdown)
+      return;
+
+    std::cout << current_frame;
+    usleep(display_duration);
+  }
+}
+
 void Eink::displayInTheBackground() {
   if (init_thread != NULL) {
     init_thread->join();
@@ -42,12 +57,31 @@ void Eink::displayInTheBackground() {
       return;
     }
 
+    std::chrono::time_point<std::chrono::system_clock> start, stop;
+    start = std::chrono::high_resolution_clock::now();
+
     EPD_2IN13_V2_DisplayPart(current_frame.GetBuffer());
+
+    stop = std::chrono::high_resolution_clock::now();
+    std::chrono::microseconds diff = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    display_duration = diff.count();
+
+    // TODO: Optimize?
+    //std::cerr << "DISPLAY TOOK: " << display_duration << "us" << std::endl; std::cerr.flush();
   }
 }
 
 Eink::Eink() {
+  display_duration = 200000;
   display_thread = NULL;
+
+  if (getenv("PI_CAMERA_HEADLESS") && strcmp(getenv("PI_CAMERA_HEADLESS"), "true") == 0) {
+    is_headless = true;
+    init_thread = NULL;
+    return;
+  }
+
+  is_headless = false;
   init_thread = new std::thread(&Eink::initialize, this);
 }
 
@@ -68,15 +102,30 @@ void Eink::Start() {
   if (display_thread != NULL)
     return;
 
-  display_thread = new std::thread(&Eink::displayInTheBackground, this);
+  mutex.lock();
+
+  // NOTE: Check again after obtaining mutex
+  if (display_thread != NULL)
+    return;
+
+  if (is_headless)
+    display_thread = new std::thread(&Eink::displayHeadless, this);
+  else
+    display_thread = new std::thread(&Eink::displayInTheBackground, this);
+
+  mutex.unlock();
 }
 
 void Eink::Stop() {
+  if (is_in_shutdown || display_thread == NULL)
+    return;
+
   is_in_shutdown = true;
   display_thread->join();
 
   mutex.lock();
   display_thread = NULL;
-  DEV_Module_Exit();
+  if (!is_headless)
+    DEV_Module_Exit();
   mutex.unlock();
 }

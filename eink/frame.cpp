@@ -6,6 +6,8 @@
 #include <stdint.h>
 
 #include "frame.hpp"
+
+#include "icons.hpp"
 #include "terminus16.hpp"
 
 extern "C" {
@@ -37,7 +39,13 @@ void Frame::Clear() {
   memset(&buffer, WHITE, BUFFER_SIZE);
 }
 
+void Frame::DrawIcon(int x, int y, int icon) {
+  Paint_SelectImage(buffer);
+  Paint_DrawString_EN(x, y, std::string(1, static_cast<char>(32 + icon)).c_str(), &Icons, WHITE, BLACK);
+}
+
 void Frame::DrawText(int x, int y, std::string text) {
+  Paint_SelectImage(buffer);
   Paint_DrawString_EN(x, y, text.c_str(), &Terminus16, WHITE, BLACK);
 }
 
@@ -46,4 +54,12 @@ void Frame::SetPixel(int x, int y, bool value) {
     buffer[x * LINE_STRIDE + y / 8] &= ~(1UL << (7 - y % 8));
   else
     buffer[x * LINE_STRIDE + y / 8] |= 1UL << (7 - y % 8);
+}
+
+void Frame::ShiftLeft(int pixels) {
+  Frame temp_frame;
+  for (int i = 0; i < WIDTH; i++) {
+    memcpy(temp_frame.GetBuffer() + (i * LINE_STRIDE), buffer + ((i + pixels) * LINE_STRIDE % BUFFER_SIZE), LINE_STRIDE);
+  }
+  memcpy(buffer, temp_frame.GetBuffer(), BUFFER_SIZE);
 }

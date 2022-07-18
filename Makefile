@@ -10,16 +10,20 @@ libcamera/build/src/libcamera/libcamera.so:
 	meson -Dprefix=/usr -Dlibdir=lib libcamera/build libcamera
 	meson compile -C libcamera/build
 
+menu/menu.o:
+	${MAKE} -C menu
+
 QR-Code-generator/cpp/qrcodegen.o:
 	$(MAKE) -C QR-Code-generator/cpp
 
-pi-camera: eink/with_deps.o libcamera/build/src/libcamera/libcamera.so
+pi-camera: eink/with_deps.o libcamera/build/src/libcamera/libcamera.so menu/menu.o
 	gcc \
 	  -std=gnu++17 \
 	  -I ./libcamera/build/include \
 	  -I ./libcamera/include \
 	  main.cpp \
 	  ./eink/with_deps.o \
+	  ./menu/menu.o \
 	  -L ./libcamera/build/src/libcamera \
 	  -L ./libcamera/build/src/libcamera/base \
 	  -l bsd \
@@ -34,11 +38,9 @@ pi-camera: eink/with_deps.o libcamera/build/src/libcamera/libcamera.so
 test: pi-camera
 	$(MAKE) -C test clean all
 
-test-menu: install-deps
-	${MAKE} -C menu
-
 rebuild:
 	$(MAKE) -C eink rebuild
+	$(MAKE) -C menu rebuild
 	rm -f pi-camera
 	$(MAKE) pi-camera
 

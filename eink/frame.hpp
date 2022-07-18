@@ -23,7 +23,9 @@ public:
   int Size() { return BUFFER_SIZE; }
 
   void Clear();
+  void DrawIcon(int x, int y, int icon);
   void DrawText(int x, int y, std::string text);
   // NOTE: true == BLACK
   void SetPixel(int x, int y, bool value = true);
+  void ShiftLeft(int pixels);
 };

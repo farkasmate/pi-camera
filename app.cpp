@@ -5,7 +5,8 @@
 
 #include "app.hpp"
 
-PiCameraApp::PiCameraApp() {
+PiCameraApp::PiCameraApp(Eink *eink) {
+  this->eink = eink;
   save_thread = NULL;
 }
 
@@ -77,7 +78,7 @@ void PiCameraApp::drawViewfinder(int focus) {
   uint8_t *Y = streams[VIEWFINDER].data;
 
   frame.Clear();
-  frame.DrawText(160, 0, "FOCUS: " + std::to_string(focus));
+  frame.DrawText(170, 8, "F: " + std::to_string(focus));
 
   for (int y = 0; y < vf_config->size.height; y++) {
     for (int x = 0; x < vf_config->size.width; x++) {
@@ -88,7 +89,7 @@ void PiCameraApp::drawViewfinder(int focus) {
     }
   }
 
-  eink.Display(&frame);
+  eink->Display(&frame);
 }
 
 void PiCameraApp::saveJpeg() {
@@ -114,7 +115,7 @@ void PiCameraApp::saveJpeg() {
 }
 
 void PiCameraApp::Start() {
-  eink.Start();
+  eink->Start();
 
   camera_manager = std::make_unique<CameraManager>();
   camera_manager->start();
@@ -154,7 +155,7 @@ void PiCameraApp::Start() {
 }
 
 void PiCameraApp::Stop() {
-  std::thread *eink_thread = new std::thread(&Eink::Stop, &eink);
+  std::thread *eink_thread = new std::thread(&Eink::Stop, eink);
 
   if (save_thread != NULL)
     save_thread->join();

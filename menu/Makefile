@@ -1,9 +1,13 @@
-all:
+all: menu.o
+
+menu.o:
 	gcc \
-	  -std=gnu++17 \
-	  main.cpp \
-	  -l bsd \
-	  -l pthread \
-	  -l stdc++ \
-	  -o menu
-	strip menu
+	  -c \
+	  menu.cpp
+
+rebuild:
+	rm -f *.o
+	${MAKE} all
+
+clean:
+	rm -f menu.o
