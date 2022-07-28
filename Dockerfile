@@ -4,7 +4,6 @@ FROM ${image}
 RUN apt-get update && \
   apt-get install -y \
     build-essential \
-    cmake \
     git \
     golang-go \
     libboost-program-options-dev \
@@ -12,8 +11,6 @@ RUN apt-get update && \
     libexif-dev \
     libgnutls28-dev \
     libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
     libturbojpeg0-dev \
     meson \
     pkg-config \
