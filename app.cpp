@@ -11,7 +11,7 @@ PiCameraApp::PiCameraApp(Eink *eink) {
 }
 
 void PiCameraApp::configureCamera() {
-  std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration({ StreamRole::Viewfinder, StreamRole::StillCapture });
+  std::unique_ptr<CameraConfiguration> config = camera->generateConfiguration({StreamRole::Viewfinder, StreamRole::StillCapture});
   streams[VIEWFINDER].config = &config->at(VIEWFINDER);
   streams[STILL].config = &config->at(STILL);
 
@@ -38,7 +38,7 @@ void PiCameraApp::configureCamera() {
 }
 
 void PiCameraApp::requestComplete(Request *request) {
-  std::cerr << "processing request... " << request->sequence() << std::endl;
+  std::cerr << "Processing request... " << request->sequence() << std::endl;
 
   if (request->status() == Request::RequestCancelled)
     return;
@@ -55,7 +55,6 @@ void PiCameraApp::requestComplete(Request *request) {
     return;
   }
 
-std::cerr << "Re-queueing request..." << std::endl;
   request->reuse(Request::ReuseFlag::ReuseBuffers);
   camera->queueRequest(request);
 }
@@ -63,16 +62,18 @@ std::cerr << "Re-queueing request..." << std::endl;
 void PiCameraApp::drawViewfinder(int focus) {
   std::cerr << "drawing on eink" << std::endl;
 
+  // clang-format off
   static constexpr uint8_t bayer[8][8] = {
-      { 0, 32,  8, 40,  2, 34, 10, 42},
-      {48, 16, 56, 24, 50, 18, 58, 26},
-      {12, 44,  4, 36, 14, 46,  6, 38},
-      {60, 28, 52, 20, 62, 30, 54, 22},
-      { 3, 35, 11, 43,  1, 33,  9, 41},
-      {51, 19, 59, 27, 49, 17, 57, 25},
-      {15, 47,  7, 39, 13, 45,  5, 37},
-      {63, 31, 55, 23, 61, 29, 53, 21}
+    { 0, 32,  8, 40,  2, 34, 10, 42},
+    {48, 16, 56, 24, 50, 18, 58, 26},
+    {12, 44,  4, 36, 14, 46,  6, 38},
+    {60, 28, 52, 20, 62, 30, 54, 22},
+    { 3, 35, 11, 43,  1, 33,  9, 41},
+    {51, 19, 59, 27, 49, 17, 57, 25},
+    {15, 47,  7, 39, 13, 45,  5, 37},
+    {63, 31, 55, 23, 61, 29, 53, 21}
   };
+  // clang-format on
 
   StreamConfiguration *vf_config = streams[VIEWFINDER].config;
   uint8_t *Y = streams[VIEWFINDER].data;
@@ -106,10 +107,11 @@ void PiCameraApp::saveJpeg() {
     std::cerr << tjGetErrorStr2(turbo_jpeg) << std::endl;
 
   // NOTE: slow
-  tjCompress2(turbo_jpeg, streams[STILL].data, still_config->size.width, still_config->stride, still_config->size.height, TJPF_RGB, &jpeg_buffer, &jpeg_size, TJSAMP_444, 95, 0);
+  tjCompress2(turbo_jpeg, streams[STILL].data, still_config->size.width, still_config->stride, still_config->size.height, TJPF_RGB, &jpeg_buffer, &jpeg_size,
+              TJSAMP_444, 95, 0);
 
-  jpeg_file = fopen("pi_camera.jpg" , "wb");
-  fwrite(jpeg_buffer , 1 , jpeg_size , jpeg_file);
+  jpeg_file = fopen("pi_camera.jpg", "wb");
+  fwrite(jpeg_buffer, 1, jpeg_size, jpeg_file);
 
   fclose(jpeg_file);
 }

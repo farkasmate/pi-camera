@@ -1,8 +1,8 @@
-#include <cstring>
-#include <iostream>
 #include <bsd/libutil.h> // pid file
 #include <csignal>       // signals
-#include <unistd.h>      // sleep
+#include <cstring>
+#include <iostream>
+#include <unistd.h> // sleep
 
 #include "eink/eink.hpp"
 #include "menu/menu.hpp"
@@ -18,37 +18,37 @@ void pressShutter(int sig) { app.pressShutter(); }
 
 int main(int argc, char *argv[]) {
   switch (menu.Parse(argc, argv)) {
-    case Menu::Option::CAPTURE:
-      std::cout << "CAPTURE" << std::endl;
+  case Menu::Option::CAPTURE:
+    std::cout << "CAPTURE" << std::endl;
 
-      std::signal(SIGUSR1, pressShutter);
+    std::signal(SIGUSR1, pressShutter);
 
-      app.Start();
+    app.Start();
 
-      while (true) {
-        if (app.IsShutterPressed())
-          break;
+    while (true) {
+      if (app.IsShutterPressed())
+        break;
 
-        std::cerr << "Sleeping 1s..." << std::endl;
-        sleep(1);
-      }
+      std::cerr << "Sleeping 1s..." << std::endl;
+      sleep(1);
+    }
 
-      app.Stop();
+    app.Stop();
 
-      break;
+    break;
 
-    case Menu::Option::SYNC:
-      std::cout << "TODO: SYNC" << std::endl;
-      break;
+  case Menu::Option::SYNC:
+    std::cout << "TODO: SYNC" << std::endl;
+    break;
 
-    case Menu::Option::DEBUG:
-      std::cout << "TODO: DEBUG" << std::endl;
-      break;
+  case Menu::Option::DEBUG:
+    std::cout << "TODO: DEBUG" << std::endl;
+    break;
 
-    default:
-      eink.Stop();
-      exit(EXIT_FAILURE);
-      break;
+  default:
+    eink.Stop();
+    exit(EXIT_FAILURE);
+    break;
   }
 
   eink.Stop();
