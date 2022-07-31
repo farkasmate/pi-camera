@@ -3,8 +3,8 @@ all: test_google_photos test_icons test_menu test_qr
 test_google_photos:
 	gcc \
 	  -I ../google_photos_upload \
-	  ../google_photos_upload/google_photos_upload.a \
 	  ./test_google_photos.cpp \
+	  ../google_photos_upload/google_photos_upload.a \
 	  -l pthread \
 	  -l stdc++ \
 	  -o ./run_google_photos
