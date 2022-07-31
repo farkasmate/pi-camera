@@ -74,15 +74,8 @@ void Eink::displayInTheBackground() {
 Eink::Eink() {
   display_duration = 200000;
   display_thread = NULL;
-
-  if (getenv("PI_CAMERA_HEADLESS") && strcmp(getenv("PI_CAMERA_HEADLESS"), "true") == 0) {
-    is_headless = true;
-    init_thread = NULL;
-    return;
-  }
-
-  is_headless = false;
-  init_thread = new std::thread(&Eink::initialize, this);
+  init_thread = NULL;
+  is_headless = true;
 }
 
 Eink::~Eink() {
@@ -103,6 +96,11 @@ void Eink::Start() {
     return;
 
   mutex.lock();
+
+  if (!(getenv("PI_CAMERA_HEADLESS") && strcmp(getenv("PI_CAMERA_HEADLESS"), "true") == 0)) {
+    is_headless = false;
+    init_thread = new std::thread(&Eink::initialize, this);
+  }
 
   // NOTE: Check again after obtaining mutex
   if (display_thread != NULL)

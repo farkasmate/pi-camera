@@ -1,5 +1,4 @@
-#include <bsd/libutil.h> // pid file
-#include <csignal>       // signals
+#include <csignal> // signals
 #include <cstring>
 #include <iostream>
 #include <unistd.h> // sleep
@@ -9,7 +8,6 @@
 
 #include "app.cpp"
 
-struct pidfh *pid;
 Eink eink;
 Menu menu(&eink);
 PiCameraApp app(&eink);
