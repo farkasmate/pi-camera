@@ -23,6 +23,7 @@ pi-camera: eink/with_deps.o libcamera/build/src/libcamera/libcamera.so menu/menu
 	  -I ./libcamera/include \
 	  main.cpp \
 	  ./eink/with_deps.o \
+	  ./google_photos_upload/google_photos_upload.a \
 	  ./menu/menu.o \
 	  -L ./libcamera/build/src/libcamera \
 	  -L ./libcamera/build/src/libcamera/base \
