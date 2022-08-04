@@ -16,9 +16,10 @@ menu/menu.o:
 QR-Code-generator/cpp/qrcodegen.o:
 	$(MAKE) -C QR-Code-generator/cpp
 
-pi-camera: eink/with_deps.o libcamera/build/src/libcamera/libcamera.so menu/menu.o
+pi-camera: eink/with_deps.o google_photos_upload/google_photos_upload.a libcamera/build/src/libcamera/libcamera.so menu/menu.o
 	gcc \
 	  -std=gnu++17 \
+	  -I ./QR-Code-generator/cpp \
 	  -I ./libcamera/build/include \
 	  -I ./libcamera/include \
 	  main.cpp \

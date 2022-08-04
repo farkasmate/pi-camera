@@ -2,8 +2,11 @@ all: test_google_photos test_icons test_menu test_qr
 
 test_google_photos:
 	gcc \
+	  -I ../QR-Code-generator/cpp \
 	  -I ../google_photos_upload \
 	  ./test_google_photos.cpp \
+	  ../QR-Code-generator/cpp/qrcodegen.o \
+	  ../eink/with_deps.o \
 	  ../google_photos_upload/google_photos_upload.a \
 	  -l pthread \
 	  -l stdc++ \

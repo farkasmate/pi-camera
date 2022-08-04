@@ -8,9 +8,16 @@ int main(int argc, char *argv[]) {
   char config_dir[] = "./.pi-camera";
   char image_path[] = "./test.jpg";
 
-  GooglePhotos gphotos = GooglePhotos(config_dir);
+  Eink eink;
+  eink.Start();
+
+  GooglePhotos gphotos = GooglePhotos(&eink, config_dir);
+
+  gphotos.Authenticate();
 
   gphotos.UploadImage(album_name, image_path);
+
+  eink.Stop();
 
   return 0;
 }

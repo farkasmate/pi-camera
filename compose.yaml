@@ -6,6 +6,8 @@ services:
 
   builder:
     build: .
+    environment:
+      PI_CAMERA_HEADLESS: true
     image: pi-camera-build
     volumes:
       - ${PWD}:/workdir:rw

@@ -6,12 +6,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -24,6 +24,7 @@ var tokenFile string
 
 func config(path string) *oauth2.Config {
 	if _, err := os.Stat(path); err != nil && errors.Is(err, os.ErrNotExist) {
+		// FIXME
 		log.Fatal(path, " not found. Follow instructions and download credentials in JSON format: https://gphotosuploader.github.io/gphotos-uploader-cli/#/configuration?id=apiappcredentials")
 	}
 
@@ -36,39 +37,9 @@ func config(path string) *oauth2.Config {
 		log.Fatal(err)
 	}
 
-	return conf
-}
-
-func googleAuth(conf oauth2.Config) *oauth2.Token {
-	ctx := context.Background()
-
 	conf.RedirectURL = "http://localhost:8080" // FIXME
-	csrfToken := randomString(16)
-	url := conf.AuthCodeURL(csrfToken)
 
-	fmt.Printf("Visit the URL for the auth dialog:\n%v\n", url)
-
-	server := http.Server{Addr: ":8080", Handler: nil}
-	code := ""
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.FormValue("state") == csrfToken {
-			code = r.FormValue("code")
-		}
-
-		server.Shutdown(ctx)
-	})
-
-	err := server.ListenAndServe()
-	if err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
-
-	token, err := conf.Exchange(ctx, code)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return token
+	return conf
 }
 
 func randomString(n int) string {
@@ -100,24 +71,18 @@ func readToken(path string) *oauth2.Token {
 	return token
 }
 
-func writeToken(path string, token *oauth2.Token) {
-	j, err := json.Marshal(token)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(j))
+func GetAuthUrl() string {
+	conf := config(configFile)
 
-	err = ioutil.WriteFile(path, j, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
+	csrfToken := randomString(16)
+	url := conf.AuthCodeURL(csrfToken, oauth2.AccessTypeOffline)
+
+	return url
 }
 
-func Authenticate() {
-	conf := config(configFile)
-	token := googleAuth(*conf)
-
-	writeToken(tokenFile, token)
+func SetConfig(configDir string) {
+	configFile = filepath.Join(configDir, "client_secret.json")
+	tokenFile = filepath.Join(configDir, "token.json")
 }
 
 func UploadImage(albumName string, imagePath string) {
@@ -146,7 +111,49 @@ func UploadImage(albumName string, imagePath string) {
 	log.Print("URL: ", media.ProductURL)
 }
 
-func SetConfig(configDir string) {
-	configFile = filepath.Join(configDir, "client_secret.json")
-	tokenFile = filepath.Join(configDir, "token.json")
+func WaitForToken(auth_url string) {
+	ctx := context.Background()
+	conf := config(configFile)
+
+	u, err := url.Parse(auth_url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	q, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	csrfToken := q.Get("state")
+
+	server := http.Server{Addr: ":8080", Handler: nil}
+	code := ""
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.FormValue("state") == csrfToken {
+			code = r.FormValue("code")
+		}
+
+		server.Shutdown(ctx)
+	})
+
+	err = server.ListenAndServe()
+	if err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
+
+	token, err := conf.Exchange(ctx, code)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	j, err := json.Marshal(token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(tokenFile, j, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

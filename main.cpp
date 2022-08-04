@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   char config_dir[] = "./.pi-camera";
   char image_path[] = "./pi_camera.jpg";
 
-  GooglePhotos gphotos = GooglePhotos(config_dir);
+  GooglePhotos gphotos = GooglePhotos(&eink, config_dir);
 
   switch (menu.Parse(argc, argv)) {
   case Menu::Option::CAPTURE:
