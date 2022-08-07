@@ -1,7 +1,10 @@
 #include <fstream>
 #include <iostream>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <turbojpeg.h>
+#include <unistd.h>
 
 #include "app.hpp"
 
@@ -100,6 +103,7 @@ void PiCameraApp::saveJpeg() {
   tjhandle turbo_jpeg;
   unsigned char *jpeg_buffer = NULL;
   unsigned long jpeg_size = 0;
+  struct stat st = {0};
 
   StreamConfiguration *still_config = streams[STILL].config;
 
@@ -110,7 +114,14 @@ void PiCameraApp::saveJpeg() {
   tjCompress2(turbo_jpeg, streams[STILL].data, still_config->size.width, still_config->stride, still_config->size.height, TJPF_RGB, &jpeg_buffer, &jpeg_size,
               TJSAMP_444, 95, 0);
 
-  jpeg_file = fopen("pi_camera.jpg", "wb");
+  if (stat("./DCIM", &st) == -1) {
+    mkdir("./DCIM", 0700);
+  }
+
+  std::string filename = "./DCIM/pi_camera_";
+  filename.append(std::to_string(std::time(0)));
+  filename.append(".jpg");
+  jpeg_file = fopen(filename.c_str(), "wb");
   fwrite(jpeg_buffer, 1, jpeg_size, jpeg_file);
 
   fclose(jpeg_file);

@@ -1,5 +1,7 @@
 package main
 
+import "C"
+
 import (
 	"context"
 	"crypto/rand"
@@ -71,6 +73,7 @@ func readToken(path string) *oauth2.Token {
 	return token
 }
 
+//export GetAuthUrl
 func GetAuthUrl() string {
 	conf := config(configFile)
 
@@ -80,11 +83,13 @@ func GetAuthUrl() string {
 	return url
 }
 
+//export SetConfig
 func SetConfig(configDir string) {
 	configFile = filepath.Join(configDir, "client_secret.json")
 	tokenFile = filepath.Join(configDir, "token.json")
 }
 
+//export UploadImage
 func UploadImage(albumName string, imagePath string) {
 	ctx := context.Background()
 
@@ -111,6 +116,7 @@ func UploadImage(albumName string, imagePath string) {
 	log.Print("URL: ", media.ProductURL)
 }
 
+//export WaitForToken
 func WaitForToken(auth_url string) {
 	ctx := context.Background()
 	conf := config(configFile)

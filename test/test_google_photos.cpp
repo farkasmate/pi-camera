@@ -4,18 +4,14 @@
 #include "../google_photos.cpp"
 
 int main(int argc, char *argv[]) {
-  char album_name[] = "pi-camera-test";
-  char config_dir[] = "./.pi-camera";
-  char image_path[] = "./test.jpg";
-
   Eink eink;
   eink.Start();
 
-  GooglePhotos gphotos = GooglePhotos(&eink, config_dir);
+  GooglePhotos gphotos = GooglePhotos(&eink, "./.pi-camera");
 
-  gphotos.Authenticate();
+  //gphotos.Authenticate();
 
-  gphotos.UploadImage(album_name, image_path);
+  gphotos.UploadImages("pi-camera-test", "./DCIM");
 
   eink.Stop();
 

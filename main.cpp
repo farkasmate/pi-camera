@@ -18,7 +18,7 @@ void pressShutter(int sig) { app.pressShutter(); }
 int main(int argc, char *argv[]) {
   char album_name[] = "pi-camera-test";
   char config_dir[] = "./.pi-camera";
-  char image_path[] = "./pi_camera.jpg";
+  char image_dir[] = "./DCIM";
 
   GooglePhotos gphotos = GooglePhotos(&eink, config_dir);
 
@@ -43,8 +43,7 @@ int main(int argc, char *argv[]) {
     break;
 
   case Menu::Option::SYNC:
-    std::cout << "TODO: SYNC" << std::endl;
-    gphotos.UploadImage(album_name, image_path);
+    gphotos.UploadImages(album_name, image_dir);
     break;
 
   case Menu::Option::DEBUG:

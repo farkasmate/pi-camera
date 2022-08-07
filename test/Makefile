@@ -2,6 +2,7 @@ all: test_google_photos test_icons test_menu test_qr
 
 test_google_photos:
 	gcc \
+	  -std=gnu++17 \
 	  -I ../QR-Code-generator/cpp \
 	  -I ../google_photos_upload \
 	  ./test_google_photos.cpp \
