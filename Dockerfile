@@ -1,13 +1,15 @@
-ARG image=arm32v5/debian:bullseye
-FROM ${image}
+FROM raspbian/stretch:latest
 
-RUN apt-get update && \
-  apt-get install -y \
+RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi' > /etc/apt/sources.list \
+  && echo 'deb http://archive.raspberrypi.org/debian/ bullseye main' >> /etc/apt/sources.list \
+  && apt-get update \
+  && apt-get install -y \
     build-essential \
     git \
     golang-go \
     libboost-program-options-dev \
     libbsd-dev \
+    libcamera-dev \
     libexif-dev \
     libgnutls28-dev \
     libjpeg-dev \
@@ -19,9 +21,6 @@ RUN apt-get update && \
     python3-setuptools \
     python3-yaml \
     wget \
-    && \
-  rm -rf /var/lib/apt/lists/*
-
-ENV LD_LIBRARY_PATH=libcamera/build/src/libcamera/base:libcamera/build/src/libcamera
+  && rm -rf /var/lib/apt/lists/*
 
 CMD ["make", "rebuild"]

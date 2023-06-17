@@ -46,12 +46,10 @@ void PiCameraApp::requestComplete(Request *request) {
   if (request->status() == Request::RequestCancelled)
     return;
 
-  int focus = 0;
   ControlList controls = request->metadata();
-  if (controls.contains(libcamera::controls::FocusFoM))
-    focus = (int)(controls.get(libcamera::controls::FocusFoM) / 100);
+  std::optional<int> focus = controls.get(libcamera::controls::FocusFoM);
 
-  drawViewfinder(focus);
+  drawViewfinder(focus.has_value() ? focus.value() / 100 : 0);
 
   if (is_shutter_pressed) {
     save_thread = new std::thread(&PiCameraApp::saveJpeg);
