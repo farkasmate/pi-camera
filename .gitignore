@@ -1,4 +1,9 @@
+*.dwarf
 *.swp
 .DS_Store
+/.shards/
+/bin/
+/docs/
+/lib/
 bcm2835-1.73/
 pi-camera
