@@ -71,5 +71,33 @@ module Pi::Camera
         #    #####
         FRAME
     end
+
+    it "shifts 1 correctly" do
+      frame = Frame.new(width: 4, height: 3)
+      frame.fill(Frame::Color::Black)
+      frame.set(1, 0, Frame::Color::White) # ##
+      frame.set(2, 1, Frame::Color::White) ## #
+      frame.set(2, 2, Frame::Color::White) ## #
+      frame.shift
+      frame.to_s.should eq <<-FRAME
+         ###
+        # ##
+        # ##
+        FRAME
+    end
+
+    it "shifts around correctly" do
+      frame = Frame.new(width: 4, height: 3)
+      frame.fill(Frame::Color::Black)
+      frame.set(1, 0, Frame::Color::White) # ##
+      frame.set(2, 1, Frame::Color::White) ## #
+      frame.set(2, 2, Frame::Color::White) ## #
+      frame.shift(frame.width)
+      frame.to_s.should eq <<-FRAME
+        # ##
+        ## #
+        ## #
+        FRAME
+    end
   end
 end

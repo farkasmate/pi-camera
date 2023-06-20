@@ -7,24 +7,26 @@ module Pi::Camera
 
     getter :width, :height
 
+    @buffer : Slice(Bytes)
+
     def initialize(@width : UInt8, @height : UInt8)
-      @buffer = Bytes.new(@width.to_i * @height.to_i, Color::White.value)
+      @buffer = Bytes.new(@height.to_i).map { |slice| Bytes.new(@width.to_i, Color::White.value) }
     end
 
     def get(x, y) : Color
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      Color.from_value @buffer[x + @width * y]
+      Color.from_value @buffer[y][x]
     end
 
     def set(x : Int, y : Int, color : Color)
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      @buffer[x + @width * y] = color.value
+      @buffer[y][x] = color.value
     end
 
     def fill(color : Color)
-      @buffer.fill(color.value)
+      @buffer.each { |row| row.fill(color.value) }
     end
 
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
@@ -43,13 +45,17 @@ module Pi::Camera
       end
     end
 
+    def shift(count : Int = 1)
+      @buffer.each { |row| row.rotate! count }
+    end
+
     def to_s
       String.build do |ret|
-        @buffer.each.with_index do |color, index|
-          ret << "\n" if index > 0 && index % width == 0
-          ret << (Color.from_value(color).black? ? "#" : " ")
+        @buffer.each do |row|
+          ret << row.map { |color| Color.from_value(color).black? ? "#" : " " }.to_a.join
+          ret << "\n"
         end
-      end
+      end.chomp
     end
   end
 end
