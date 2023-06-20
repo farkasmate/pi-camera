@@ -30,10 +30,14 @@ module Pi::Camera
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
       (0..frame.width * scale - 1).each do |x|
         (0..frame.height * scale - 1).each do |y|
-          if frame.get(x // scale, y // scale) == color
-            set(x + x_offset, y + y_offset, color)
-          elsif !transparent
-            set(x + x_offset, y + y_offset, color.black? ? Color::White : Color::Black)
+          begin
+            if frame.get(x // scale, y // scale) == color
+              set(x + x_offset, y + y_offset, color)
+            elsif !transparent
+              set(x + x_offset, y + y_offset, color.black? ? Color::White : Color::Black)
+            end
+          rescue IndexError
+            # NOTE: Clipping `frame`
           end
         end
       end

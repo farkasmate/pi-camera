@@ -3,6 +3,31 @@ require "../src/pi-camera/frame"
 
 module Pi::Camera
   describe Frame do
+    it "gets last pixel" do
+      frame = Frame.new(width: 4, height: 3)
+      frame.get(3, 2).should eq Frame::Color::White
+    end
+
+    it "fails on getting out of bounds pixel" do
+      expect_raises(IndexError) do
+        frame = Frame.new(width: 4, height: 3)
+        frame.get(4, 3)
+      end
+    end
+
+    it "sets last pixel" do
+      frame = Frame.new(width: 4, height: 3)
+      frame.set(3, 2, Frame::Color::Black)
+      frame.get(3, 2).should eq Frame::Color::Black
+    end
+
+    it "fails on setting out of bounds pixel" do
+      expect_raises(IndexError) do
+        frame = Frame.new(width: 4, height: 3)
+        frame.set(5, 6, Frame::Color::Black)
+      end
+    end
+
     it "pretty prints" do
       frame = Frame.new(width: 4, height: 3)
       frame.fill(Frame::Color::Black)
@@ -29,6 +54,21 @@ module Pi::Camera
         #    #####
         #    #####
         ##########
+        FRAME
+    end
+
+    it "clips correctly" do
+      white_square = Frame.new(width: 2, height: 2)
+
+      frame = Frame.new(width: 10, height: 5)
+      frame.fill(Frame::Color::Black)
+      frame.draw(white_square, x_offset: 1, y_offset: 2, scale: 2)
+      frame.to_s.should eq <<-FRAME
+        ##########
+        ##########
+        #    #####
+        #    #####
+        #    #####
         FRAME
     end
   end
