@@ -1,5 +1,5 @@
 [submodule "e-Paper"]
-	path = eink/e-Paper
+	path = epd/e-Paper
 	url = https://github.com/waveshare/e-Paper.git
 [submodule "QR-Code-generator"]
 	ignore = untracked

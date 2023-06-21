@@ -24,6 +24,13 @@ module Pi::Camera
       case command
       when :debug
         puts "Hello World!"
+        epd = Epd.new
+        frame = Frame.new(width: 250, height: 122)
+        frame.set(10, 10, Frame::Color::Black)
+        frame.set(20, 10, Frame::Color::Black)
+        frame.set(10, 20, Frame::Color::Black)
+        frame.set(20, 20, Frame::Color::Black)
+        epd.display frame.to_epd_payload
       else
         puts parser
         exit 1
