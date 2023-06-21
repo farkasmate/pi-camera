@@ -1,32 +1,34 @@
+require "bit_array"
+
 module Pi::Camera
   class Frame
     enum Color : UInt8
-      Black
-      White
+      Black # true
+      White # false
     end
 
     getter :width, :height
 
-    @buffer : Slice(Bytes)
+    @buffer : Slice(BitArray)
 
     def initialize(@width : UInt8, @height : UInt8)
-      @buffer = Bytes.new(@height.to_i).map { |slice| Bytes.new(@width.to_i, Color::White.value) }
+      @buffer = Bytes.new(@height.to_i).map { |slice| BitArray.new(@width.to_i, false) }
     end
 
     def get(x, y) : Color
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      Color.from_value @buffer[y][x]
+      @buffer[y][x] ? Color::Black : Color::White
     end
 
     def set(x : Int, y : Int, color : Color)
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      @buffer[y][x] = color.value
+      @buffer[y][x] = color.black?
     end
 
     def fill(color : Color)
-      @buffer.each { |row| row.fill(color.value) }
+      @buffer.each { |row| row.fill(color.black?) }
     end
 
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
@@ -52,7 +54,7 @@ module Pi::Camera
     def to_s
       String.build do |ret|
         @buffer.each do |row|
-          ret << row.map { |color| Color.from_value(color).black? ? "#" : " " }.to_a.join
+          ret << row.map { |color| color ? "#" : " " }.to_a.join
           ret << "\n"
         end
       end.chomp
