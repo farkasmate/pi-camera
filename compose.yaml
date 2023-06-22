@@ -4,40 +4,10 @@ services:
     privileged: true
     command: --reset -p yes
 
-  builder:
+  arm:
     build: .
-    environment:
-      PI_CAMERA_HEADLESS: true
-    image: pi-camera-build
+    image: pi-camera
     volumes:
       - ${PWD}:/workdir:rw
     working_dir: /workdir
     tty: true
-
-  dev:
-    build:
-      context: .
-      args:
-        image: debian:bullseye
-    environment:
-      PI_CAMERA_HEADLESS: true
-    image: pi-camera-dev
-    command: make rebuild test
-    volumes:
-      - ${PWD}:/workdir:rw
-    working_dir: /workdir
-    tty: true
-
-  linter:
-    build: .linter
-    volumes:
-      - ${PWD}:/workdir:rw
-    working_dir: /workdir
-    user: "${UID:-1000}:${GID:-1000}"
-
-  crystal:
-    image: crystallang/crystal:1.8.2-alpine
-    command: /build/bin/pi-camera
-    volumes:
-      - ./:/build/:ro
-    working_dir: /build/
