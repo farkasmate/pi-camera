@@ -58,7 +58,7 @@ module Pi::Camera
     end
 
     def to_epd_payload : Bytes
-      Slice.join @buffer.map { |column| column.to_slice }
+      Slice.join(@buffer.map { |column| column.to_slice }).map { |byte| byte.bit_reverse }
     end
   end
 end
