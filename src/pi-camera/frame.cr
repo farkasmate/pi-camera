@@ -3,8 +3,8 @@ require "bit_array"
 module Pi::Camera
   class Frame
     enum Color : UInt8
-      Black # true
-      White # false
+      Black # false
+      White # true
     end
 
     getter :width, :height
@@ -12,23 +12,23 @@ module Pi::Camera
     @buffer : Slice(BitArray)
 
     def initialize(@width : UInt8, @height : UInt8)
-      @buffer = Bytes.new(@height.to_i).map { |slice| BitArray.new(@width.to_i, false) }
+      @buffer = Bytes.new(@width.to_i).map { |slice| BitArray.new(@height.to_i, true) }
     end
 
     def get(x, y) : Color
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      @buffer[y][x] ? Color::Black : Color::White
+      @buffer[x][y] ? Color::White : Color::Black
     end
 
     def set(x : Int, y : Int, color : Color)
       raise IndexError.new if x.negative? || y.negative? || x > @width || y > @height
 
-      @buffer[y][x] = color.black?
+      @buffer[x][y] = color.white?
     end
 
     def fill(color : Color)
-      @buffer.each { |row| row.fill(color.black?) }
+      @buffer.each { |row| row.fill(color.white?) }
     end
 
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
@@ -48,20 +48,17 @@ module Pi::Camera
     end
 
     def shift(count : Int = 1)
-      @buffer.each { |row| row.rotate! count }
+      @buffer.rotate! count
     end
 
     def to_s
-      String.build do |ret|
-        @buffer.each do |row|
-          ret << row.map { |color| color ? "#" : " " }.to_a.join
-          ret << "\n"
-        end
-      end.chomp
+      @buffer.map { |column| column.to_a }.to_a.transpose.map do |row|
+        row.map { |color| color ? " " : "#" }.join
+      end.join("\n")
     end
 
     def to_epd_payload : Bytes
-      Slice.join @buffer.map { |row| row.to_slice }
+      Slice.join @buffer.map { |column| column.to_slice }
     end
   end
 end
