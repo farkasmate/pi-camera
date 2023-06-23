@@ -2,7 +2,7 @@ require "bit_array"
 
 module Pi::Camera
   class Frame
-    enum Color : UInt8
+    enum Color
       Black # false
       White # true
     end
@@ -11,8 +11,17 @@ module Pi::Camera
 
     @buffer : Slice(BitArray)
 
-    def initialize(@width : UInt8, @height : UInt8)
-      @buffer = Bytes.new(@width.to_i).map { |slice| BitArray.new(@height.to_i, true) }
+    def initialize(@width : Int32, @height : Int32)
+      @buffer = Bytes.new(@width).map { |slice| BitArray.new(@height, true) }
+    end
+
+    def initialize(@width : Int32, @height : Int32, &block : Int32, Int32 -> Color)
+      initialize(@width, @height)
+      (0..width - 1).each do |x|
+        (0..height - 1).each do |y|
+          set(x, y, yield(x, y))
+        end
+      end
     end
 
     def get(x, y) : Color

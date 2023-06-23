@@ -1,2 +1,10 @@
 version: 2.0
-shards: {}
+shards:
+  baked_file_system:
+    git: https://github.com/schovi/baked_file_system.git
+    version: 0.10.0
+
+  fontanyl:
+    git: https://github.com/farkasmate/fontanyl.git
+    version: 1.1.0
+

@@ -41,7 +41,9 @@ RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib no
     build-essential \
     libevent-dev \
     libgc-dev \
+    libgmp-dev \
     libpcre2-dev \
+    zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=BUILDER /build/bin/pi-camera.o bin/

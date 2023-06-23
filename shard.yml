@@ -4,6 +4,14 @@ version: 2.0.0
 authors:
   - Mate Farkas <mate.farkas@sch.hu>
 
+dependencies:
+  baked_file_system:
+    github: schovi/baked_file_system
+    version: ~> 0.10
+  fontanyl:
+    github: farkasmate/fontanyl
+    version: ~> 1.1
+
 targets:
   pi-camera:
     main: src/pi-camera.cr
