@@ -13,7 +13,7 @@ module Pi::Camera
         loop do
           frame.shift_left!
           @renderer.call frame
-          sleep 1.seconds
+          Fiber.yield
         end
       end
     end

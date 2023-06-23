@@ -32,7 +32,7 @@ module Pi::Camera
         frame.set(20, 20, Frame::Color::Black)
         epd.display frame.to_epd_payload
       when :menu
-        epd = Epd.new
+        epd = Epd.new Epd::Mode::Partial
         menu = Menu.new { |frame| epd.display frame.to_epd_payload }
         menu.animate
         sleep 10.seconds
