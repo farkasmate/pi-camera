@@ -31,6 +31,11 @@ module Pi::Camera
         frame.set(10, 20, Frame::Color::Black)
         frame.set(20, 20, Frame::Color::Black)
         epd.display frame.to_epd_payload
+      when :menu
+        epd = Epd.new
+        menu = Menu.new { |frame| epd.display frame.to_epd_payload }
+        menu.animate
+        sleep 10.seconds
       else
         puts parser
         exit 1
