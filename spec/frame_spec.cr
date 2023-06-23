@@ -72,13 +72,13 @@ module Pi::Camera
         FRAME
     end
 
-    it "shifts 1 correctly" do
+    it "shifts left correctly" do
       frame = Frame.new(width: 4, height: 3)
       frame.fill(Frame::Color::Black)
       frame.set(1, 0, Frame::Color::White) # ##
       frame.set(2, 1, Frame::Color::White) ## #
       frame.set(2, 2, Frame::Color::White) ## #
-      frame.shift
+      frame.shift_left!
       frame.to_s.should eq <<-FRAME
          ###
         # ##
@@ -92,11 +92,43 @@ module Pi::Camera
       frame.set(1, 0, Frame::Color::White) # ##
       frame.set(2, 1, Frame::Color::White) ## #
       frame.set(2, 2, Frame::Color::White) ## #
-      frame.shift(frame.width)
+      frame.shift_left! frame.width
       frame.to_s.should eq <<-FRAME
         # ##
         ## #
         ## #
+        FRAME
+    end
+
+    it "shifts up correctly" do
+      frame = Frame.new(width: 4, height: 3)
+      frame.fill(Frame::Color::Black)
+      frame.set(1, 0, Frame::Color::White) # ##
+      frame.set(2, 1, Frame::Color::White) ## #
+      frame.set(2, 2, Frame::Color::White) ## #
+      frame.shift_up!
+      frame.to_s.should eq <<-FRAME
+        ## #
+        ## #
+        # ##
+        FRAME
+    end
+
+    it "shifts down correctly" do
+      frame = Frame.new(width: 5, height: 5)
+      frame.fill(Frame::Color::Black)
+      frame.set(1, 0, Frame::Color::White) # ###
+      frame.set(2, 1, Frame::Color::White) ## ##
+      frame.set(2, 2, Frame::Color::White) ## ##
+      frame.set(3, 3, Frame::Color::White) ### #
+      frame.set(3, 4, Frame::Color::White) ### #
+      frame.shift_down!
+      frame.to_s.should eq <<-FRAME
+        ### #
+        # ###
+        ## ##
+        ## ##
+        ### #
         FRAME
     end
   end

@@ -28,7 +28,7 @@ module Pi::Camera
     end
 
     def fill(color : Color)
-      @buffer.each { |row| row.fill(color.white?) }
+      @buffer.each { |column| column.fill(color.white?) }
     end
 
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
@@ -47,8 +47,20 @@ module Pi::Camera
       end
     end
 
-    def shift(count : Int = 1)
+    def shift_left!(count : Int = 1)
       @buffer.rotate! count
+    end
+
+    def shift_right!(count : Int = 1)
+      shift_left! -count
+    end
+
+    def shift_up!(count : Int = 1)
+      @buffer.map! { |column| column.rotate! count }
+    end
+
+    def shift_down!(count : Int = 1)
+      shift_up! -count
     end
 
     def to_s
