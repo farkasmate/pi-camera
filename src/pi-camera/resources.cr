@@ -1,6 +1,6 @@
 require "baked_file_system"
 
-class FileStorage
+class Resources
   extend BakedFileSystem
 
   bake_folder "resources/"

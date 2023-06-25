@@ -1,14 +1,14 @@
 require "fontanyl"
 
-require "./file_storage"
 require "./frame"
+require "./resources"
 
 module Pi::Camera::Fonts
   module Font
     module Terminus
       extend self
 
-      @@font = Fontanyl::BDF.new(FileStorage.get("ter-u16n.bdf"))
+      @@font = Fontanyl::BDF.new(Resources.get("fonts/ter-u16n.bdf"))
 
       def text(string : String) : Frame
         bitmap = @@font.get_bitmap(string, wrap: 0)[0]

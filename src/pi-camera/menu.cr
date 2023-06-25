@@ -1,17 +1,17 @@
 module Pi::Camera
   class Menu
-    def initialize(&renderer : Frame -> Nil)
-      @renderer = renderer
+    def initialize(@ui : Ui)
     end
 
     def animate
       spawn do
         frame = Frame.new(width: 250, height: 122)
-        frame.draw(Frame::Icon::Camera, x_offset: 10, y_offset: 10, scale: 3)
         loop do
-          frame.shift_left!
-          @renderer.call frame
-          Fiber.yield
+          4.times do |index|
+            frame.draw(Frame::Icon::Camera[index], x_offset: 101, y_offset: 37) # FIXME
+            @ui.display frame
+            Fiber.yield
+          end
         end
       end
     end

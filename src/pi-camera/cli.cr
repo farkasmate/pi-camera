@@ -32,7 +32,7 @@ module Pi::Camera
         frame.draw(Frame::Font::Terminus.text("Hello World!"))
         ui.display frame
       when :menu
-        menu = Menu.new { |frame| ui.display frame }
+        menu = Menu.new ui
         menu.animate
         sleep 10.seconds
       else
