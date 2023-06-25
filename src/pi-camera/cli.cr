@@ -4,6 +4,7 @@ module Pi::Camera
   class CLI
     def initialize
       command = nil
+      is_headless = false
 
       parser = OptionParser.new do |parser|
         parser.banner = "Usage: pi-camera [OPTIONS] [COMMAND]"
@@ -11,6 +12,8 @@ module Pi::Camera
           puts parser
           exit
         end
+
+        parser.on("--headless", "Render UI on stdout") { is_headless = true }
 
         parser.on("capture", "Capture a photo") { command = :capture }
         parser.on("debug", "Display debug information") { command = :debug }
@@ -21,15 +24,15 @@ module Pi::Camera
 
       parser.parse
 
+      ui = is_headless ? Ui::Stdout.new : Ui::Epd.new Ui::Epd::Mode::Partial
+
       case command
       when :debug
         frame = Frame.new(width: 250, height: 122)
         frame.draw(Frame::Font::Terminus.text("Hello World!"))
-        epd = Epd.new
-        epd.display frame.to_epd_payload
+        ui.display frame
       when :menu
-        epd = Epd.new Epd::Mode::Partial
-        menu = Menu.new { |frame| epd.display frame.to_epd_payload }
+        menu = Menu.new { |frame| ui.display frame }
         menu.animate
         sleep 10.seconds
       else

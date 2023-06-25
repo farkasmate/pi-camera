@@ -72,14 +72,14 @@ module Pi::Camera
       shift_up! -count
     end
 
-    def to_s
-      @buffer.map { |column| column.to_a }.to_a.transpose.map do |row|
-        row.map { |color| color ? " " : "#" }.join
-      end.join("\n")
-    end
-
-    def to_epd_payload : Bytes
-      Slice.join(@buffer.map { |column| column.to_slice }).map { |byte| byte.bit_reverse }
+    def to_s(io)
+      data = @buffer.map { |column| column.to_a }.to_a.transpose
+      data.each.with_index do |row, index|
+        row.each do |color|
+          io << (color ? " " : "#")
+        end
+        io << "\n" unless index + 1 == data.size
+      end
     end
   end
 end

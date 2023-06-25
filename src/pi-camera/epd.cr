@@ -1,5 +1,13 @@
+require "./ui"
+
 module Pi::Camera
-  class Epd
+  class Frame
+    def to_epd_payload : Bytes
+      Slice.join(@buffer.map { |column| column.to_slice }).map { |byte| byte.bit_reverse }
+    end
+  end
+
+  class Ui::Epd < Ui
     enum Mode : UInt8
       Full
       Partial
@@ -30,12 +38,12 @@ module Pi::Camera
       at_exit { finalize }
     end
 
-    def display(bytes : Bytes)
+    def display(frame : Frame)
       case @mode
       when Mode::Full
-        LibEPD.EPD_2IN13_V2_Display bytes.to_unsafe
+        LibEPD.EPD_2IN13_V2_Display frame.to_epd_payload.to_unsafe
       when Mode::Partial
-        LibEPD.EPD_2IN13_V2_DisplayPart bytes.to_unsafe
+        LibEPD.EPD_2IN13_V2_DisplayPart frame.to_epd_payload.to_unsafe
       end
     end
 
@@ -44,7 +52,7 @@ module Pi::Camera
         @mode = Mode::Full
         LibEPD.EPD_2IN13_V2_Init Mode::Full
         frame = Frame.new(width: 250, height: 122)
-        display frame.to_epd_payload
+        display frame
       end
 
       LibEPD.DEV_Module_Exit
