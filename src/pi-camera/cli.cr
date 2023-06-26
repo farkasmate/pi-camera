@@ -29,7 +29,7 @@ module Pi::Camera
       case command
       when :debug
         frame = Frame.new(width: 250, height: 122)
-        frame.draw(Frame::Font::Terminus.text("Hello World!"))
+        frame.draw(Fonts::Terminus.text("Hello World!"))
         ui.display frame
       when :menu
         menu = Menu.new ui

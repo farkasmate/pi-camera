@@ -3,8 +3,8 @@ require "fontanyl"
 require "./frame"
 require "./resources"
 
-module Pi::Camera::Fonts
-  module Font
+module Pi::Camera
+  module Fonts
     module Terminus
       extend self
 
@@ -21,11 +21,5 @@ module Pi::Camera::Fonts
         frame
       end
     end
-  end
-end
-
-module Pi::Camera
-  class Frame
-    include Fonts
   end
 end
