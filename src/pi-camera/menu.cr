@@ -1,34 +1,49 @@
 module Pi::Camera
   class Menu
-    @@options : Array(Array(Frame)) = [Icons::Wrench, Icons::Camera, Icons::Cloud]
+    @@options : Array(Array(Frame)) = [Icons::Camera, Icons::Cloud, Icons::Wrench]
 
     @frame = Frame.new(width: 250, height: 122)
     @is_next = false
+    @is_selected = false
 
     def initialize(@ui : Ui)
-    end
-
-    def animate
       Signal::USR1.trap do
         @is_next = true
       end
 
+      Signal::USR2.trap do
+        @is_selected = true
+        # FIXME
+        selection = case @@options[0]
+                    when Icons::Camera
+                      "capture"
+                    when Icons::Cloud
+                      "sync"
+                    when Icons::Wrench
+                      "debug"
+                    end
+        puts "Selected option: #{selection}"
+      end
+    end
+
+    def animate
       spawn do
         loop do
           4.times do |index|
-            @frame.draw(@@options[0][0], x_offset: 18, y_offset: 37)      # FIXME
-            @frame.draw(@@options[1][index], x_offset: 101, y_offset: 37) # FIXME
-            @frame.draw(@@options[2][0], x_offset: 184, y_offset: 37)     # FIXME
+            @frame.clear
+            @frame.draw(@@options[-1][0], x_offset: 18, y_offset: 37)     # FIXME
+            @frame.draw(@@options[0][index], x_offset: 101, y_offset: 37) # FIXME
+            @frame.draw(@@options[1][0], x_offset: 184, y_offset: 37)     # FIXME
             @ui.display @frame
             Fiber.yield
+
             break if @is_next
           end
 
           animate_next if @is_next
+          break if @is_selected
         end
       end
-
-      Signal::USR1.reset
     end
 
     private def animate_next

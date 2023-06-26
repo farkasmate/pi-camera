@@ -40,6 +40,10 @@ module Pi::Camera
       @buffer.each { |column| column.fill(color.white?) }
     end
 
+    def clear
+      fill(Color::White)
+    end
+
     def draw(frame : Frame, x_offset : Int = 0, y_offset : Int = 0, scale : Int = 1, color : Color = Color::Black, transparent : Bool = false)
       (0..frame.width * scale - 1).each do |x|
         (0..frame.height * scale - 1).each do |y|

@@ -4,6 +4,8 @@ module Pi::Camera
   class CLI
     def initialize
       Pidfile.lock "./pi-camera.pid"
+      Signal::USR1.ignore
+      Signal::USR2.ignore
 
       command = nil
       is_headless = false
