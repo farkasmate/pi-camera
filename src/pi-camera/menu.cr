@@ -9,12 +9,16 @@ module Pi::Camera
     end
 
     def animate
+      Signal::USR1.trap do
+        @is_next = true
+      end
+
       spawn do
         loop do
           4.times do |index|
-            @frame.draw(@@options[0][index], x_offset: 18, y_offset: 37)  # FIXME
+            @frame.draw(@@options[0][0], x_offset: 18, y_offset: 37)      # FIXME
             @frame.draw(@@options[1][index], x_offset: 101, y_offset: 37) # FIXME
-            @frame.draw(@@options[2][index], x_offset: 184, y_offset: 37) # FIXME
+            @frame.draw(@@options[2][0], x_offset: 184, y_offset: 37)     # FIXME
             @ui.display @frame
             Fiber.yield
             break if @is_next
@@ -23,6 +27,8 @@ module Pi::Camera
           animate_next if @is_next
         end
       end
+
+      Signal::USR1.reset
     end
 
     private def animate_next
@@ -33,10 +39,6 @@ module Pi::Camera
       end
       @@options.rotate!
       @is_next = false
-    end
-
-    def next
-      @is_next = true
     end
   end
 end

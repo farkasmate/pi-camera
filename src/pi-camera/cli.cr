@@ -3,6 +3,8 @@ require "option_parser"
 module Pi::Camera
   class CLI
     def initialize
+      Pidfile.lock "./pi-camera.pid"
+
       command = nil
       is_headless = false
 
