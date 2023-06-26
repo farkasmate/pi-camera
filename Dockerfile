@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1-labs
 FROM crystallang/crystal:1.8.2-alpine AS BUILDER
 
 ENV CRYSTAL_LIBRARY_PATH=/build/lib
@@ -8,7 +9,10 @@ COPY shard.yml shard.lock .
 COPY spec/ spec/
 COPY src/ src/
 
-RUN shards build \
+ENV CRYSTAL_CACHE_DIR=/root/.cache/crystal
+
+RUN --mount=type=cache,target=/root/.cache/crystal \
+  shards build \
   --cross-compile \
   --target=arm-linux-gnueabihf \
   | grep '^cc' > link.sh
@@ -26,9 +30,9 @@ RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib no
   && rm -rf /var/lib/apt/lists/*
 
 COPY epd/Makefile .
-COPY epd/e-Paper/ e-Paper/
+ADD --keep-git-dir=true https://github.com/waveshare/e-Paper.git#8af38f2c89c236f8f9ebd353f69f044fd3d81cc3 e-Paper/
 
-RUN make clean all
+RUN make
 
 FROM raspbian/stretch:latest AS LINKER
 
