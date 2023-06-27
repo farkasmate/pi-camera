@@ -3,7 +3,15 @@ require "option_parser"
 module Pi::Camera
   class CLI
     def initialize
-      Pidfile.lock "./pi-camera.pid"
+      pid_path = "./pi-camera.pid"
+      is_remote_control = false
+
+      begin
+        Pidfile.lock pid_path
+      rescue Pidfile::ProcessAlreadyRunning
+        is_remote_control = true
+      end
+
       Signal::USR1.ignore
       Signal::USR2.ignore
 
@@ -21,12 +29,25 @@ module Pi::Camera
 
         parser.on("capture", "Capture a photo") { command = :capture }
         parser.on("debug", "Display debug information") { command = :debug }
-        parser.on("menu", "Start menu or next menu item") { command = :menu }
+        parser.on("menu", "Start menu or next menu item (or shutter)") { command = :menu }
         parser.on("select", "Select current menu item or start capture if menu is not active") { command = :select }
         parser.on("sync", "Sync cached images into Google Photos") { command = :sync }
       end
 
       parser.parse
+
+      if is_remote_control
+        pid = File.read(pid_path).to_i
+        case command
+        when :menu
+          Process.signal(Signal::USR1, pid)
+        when :select
+          Process.signal(Signal::USR2, pid)
+        else
+          exit 2
+        end
+        exit 0
+      end
 
       ui = is_headless ? Ui::Stdout.new : Ui::Epd.new Ui::Epd::Mode::Partial
 
