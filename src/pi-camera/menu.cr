@@ -5,6 +5,7 @@ module Pi::Camera
     @frame = Frame.new(width: 250, height: 122)
     @is_next = false
     @is_selected = false
+    @selection = :capture
 
     def initialize(@ui : Ui)
       Signal::USR1.trap do
@@ -14,19 +15,19 @@ module Pi::Camera
       Signal::USR2.trap do
         @is_selected = true
         # FIXME
-        selection = case @@options[0]
-                    when Icons::Camera
-                      "capture"
-                    when Icons::Cloud
-                      "sync"
-                    when Icons::Wrench
-                      "debug"
-                    end
-        puts "Selected option: #{selection}"
+        @selection = case @@options[0]
+                     when Icons::Camera
+                       :capture
+                     when Icons::Cloud
+                       :sync
+                     when Icons::Wrench
+                       :debug
+                     else
+                       :error
+                     end
+        puts "Selected option: #{@selection}"
       end
-    end
 
-    def animate
       spawn do
         loop do
           4.times do |index|
@@ -42,6 +43,11 @@ module Pi::Camera
 
           animate_next if @is_next
           break if @is_selected
+        end
+
+        case @selection
+        when :debug
+          Debug.new @ui
         end
       end
     end

@@ -10,6 +10,10 @@ module Pi::Camera
 
       @@font = Fontanyl::BDF.new(Resources.get("fonts/ter-u16n.bdf"))
 
+      def height
+        @@font.size
+      end
+
       def text(string : String) : Frame
         bitmap = @@font.get_bitmap(string, wrap: 0)[0]
 

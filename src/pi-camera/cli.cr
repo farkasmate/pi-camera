@@ -32,12 +32,9 @@ module Pi::Camera
 
       case command
       when :debug
-        frame = Frame.new(width: 250, height: 122)
-        frame.draw(Fonts::Terminus.text("Hello World!"))
-        ui.display frame
+        Debug.new ui
       when :menu
-        menu = Menu.new ui
-        menu.animate
+        Menu.new ui
         sleep 10.seconds
       else
         puts parser
