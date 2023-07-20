@@ -1,7 +1,7 @@
 require "./spec_helper"
 require "../src/pi-camera/fonts"
 
-module Pi::Camera
+module PiCamera
   describe Fonts::Terminus do
     it "loads font file correctly" do
       frame = Fonts::Terminus.text "Hi"

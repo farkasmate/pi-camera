@@ -1,7 +1,7 @@
 require "./frame"
 require "./resources"
 
-module Pi::Camera
+module PiCamera
   module Icons
     extend self
 

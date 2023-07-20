@@ -1,4 +1,4 @@
-module Pi::Camera
+module PiCamera
   abstract class Ui
     abstract def display(frame : Frame)
   end

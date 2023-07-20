@@ -1,5 +1,5 @@
 require "./pi-camera/*"
 
-module Pi::Camera
+module PiCamera
   CLI.new
 end

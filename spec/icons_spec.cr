@@ -1,7 +1,7 @@
 require "./spec_helper"
 require "../src/pi-camera/icons"
 
-module Pi::Camera
+module PiCamera
   describe Icons do
     it "loads wrench icon correctly" do
       Icons::Wrench[0].to_s.should eq <<-FRAME

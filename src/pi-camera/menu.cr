@@ -1,4 +1,4 @@
-module Pi::Camera
+module PiCamera
   class Menu
     @@options : Array(Array(Frame)) = [Icons::Camera, Icons::Cloud, Icons::Wrench]
 

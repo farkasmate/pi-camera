@@ -1,4 +1,4 @@
-module Pi::Camera
+module PiCamera
   class Debug
     def initialize(@ui : Ui)
       hostname = shell "hostname"

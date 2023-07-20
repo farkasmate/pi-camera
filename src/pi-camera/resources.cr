@@ -1,6 +1,6 @@
 require "baked_file_system"
 
-module Pi::Camera
+module PiCamera
   class Resources
     extend BakedFileSystem
 

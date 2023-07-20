@@ -1,6 +1,6 @@
 require "option_parser"
 
-module Pi::Camera
+module PiCamera
   class CLI
     def initialize
       pid_path = "./pi-camera.pid"

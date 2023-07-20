@@ -1,6 +1,6 @@
 require "bit_array"
 
-module Pi::Camera
+module PiCamera
   class Frame
     enum Color
       Black # false

@@ -1,6 +1,6 @@
 require "./ui"
 
-module Pi::Camera
+module PiCamera
   class Frame
     def to_epd_payload : Bytes
       Slice.join(@buffer.map { |column| column.to_slice }).map { |byte| byte.bit_reverse }

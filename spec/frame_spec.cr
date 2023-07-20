@@ -1,7 +1,7 @@
 require "./spec_helper"
 require "../src/pi-camera/frame"
 
-module Pi::Camera
+module PiCamera
   describe Frame do
     it "gets last pixel" do
       frame = Frame.new(width: 4, height: 3)
