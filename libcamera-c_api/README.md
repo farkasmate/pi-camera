@@ -1,6 +1,6 @@
 # libcamera C bindings
 
-Sources were copied from a [libcamera-rs][libcamera_rs] Rust crate.
+Sources were copied from a [libcamera-rs][libcamera_rs] Rust crate and modified in [patch.h](./patch.h) and [patch.cpp](./patch.cpp).
 The original README and licenses are included below.
 
 [libcamera_rs]: https://github.com/lit-robotics/libcamera-rs/tree/36c41b79e7dfb536c48c81e9d870c142a58b0f6b/libcamera-sys/c_api

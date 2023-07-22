@@ -11,6 +11,9 @@ dependencies:
   fontanyl:
     github: farkasmate/fontanyl
     version: ~> 1.1
+  pluto:
+    github: phenopolis/pluto
+    version: ~> 1.0
 
 targets:
   pi-camera:
