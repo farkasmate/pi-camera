@@ -5,7 +5,10 @@ services:
     command: --reset -p yes
 
   arm:
-    build: .
+    build:
+      context: .
+      args:
+        LIBCAMERA_VERSION: 0~git20230302+923f5d70-1
     image: pi-camera
     volumes:
       - ${PWD}:/workdir:rw
