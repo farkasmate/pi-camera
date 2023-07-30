@@ -21,9 +21,9 @@ module PiCamera
       alias Stream = Pointer(Void)
 
       enum ConfigurationStatus
-        VALID = 0
+        VALID    = 0
         ADJUSTED = 1
-        INVALID = 2
+        INVALID  = 2
       end
 
       enum ControlId
@@ -36,13 +36,13 @@ module PiCamera
       end
 
       enum RequestStatus
-        PENDING = 0
-        COMPLETE = 1
+        PENDING   = 0
+        COMPLETE  = 1
         CANCELLED = 2
       end
 
       enum ReuseFlag
-        DEFAULS = 0
+        DEFAULS       = 0
         REUSE_BUFFERS = 1
       end
 
@@ -60,10 +60,10 @@ module PiCamera
       end
 
       enum StreamRole
-        RAW = 0
-        STILL_CAPTURE = 1
+        RAW             = 0
+        STILL_CAPTURE   = 1
         VIDEO_RECORDING = 2
-        VIEW_FINDER = 3
+        VIEW_FINDER     = 3
       end
 
       fun camera_manager_create = libcamera_camera_manager_create : CameraManager
@@ -103,7 +103,7 @@ module PiCamera
       fun framebuffer_allocator_free = libcamera_framebuffer_allocator_free(allocator : FrameBufferAllocator, stream : Stream) : LibC::Int
       fun framebuffer_allocator_buffers = libcamera_framebuffer_allocator_buffers(allocator : FrameBufferAllocator, stream : Stream) : FrameBufferList
 
-      fun framebuffer_list_get = libcamera_framebuffer_list_get(buffers : FrameBufferList, index : LibC::SizeT): FrameBuffer
+      fun framebuffer_list_get = libcamera_framebuffer_list_get(buffers : FrameBufferList, index : LibC::SizeT) : FrameBuffer
 
       fun framebuffer_planes = libcamera_framebuffer_planes(buffer : FrameBuffer) : FrameBufferPlaneList
       fun framebuffer_planes_at = libcamera_framebuffer_planes_at(planes : FrameBufferPlaneList, index : LibC::SizeT) : FrameBufferPlane
