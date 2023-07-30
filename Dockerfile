@@ -15,7 +15,8 @@ RUN --mount=type=cache,target=/root/.cache/crystal \
   shards build \
   --cross-compile \
   --target=arm-linux-gnueabihf \
-  | grep '^cc' > link.sh
+  | tee /tmp/build.log \
+  && grep '^cc' /tmp/build.log > link.sh
 
 FROM raspbian/stretch:latest AS LIBEPD
 
