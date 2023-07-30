@@ -1,4 +1,5 @@
 require "./bindings"
+require "./image_data"
 require "./request"
 
 module PiCamera

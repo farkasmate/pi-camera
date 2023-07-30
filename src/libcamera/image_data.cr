@@ -1,6 +1,6 @@
 require "pluto/format/binding/lib_jpeg_turbo"
 
-require "./libcamera/enums"
+require "./enums"
 
 module PiCamera
   class ImageData

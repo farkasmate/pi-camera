@@ -1,3 +1,5 @@
+require "./fonts"
+
 module PiCamera
   class Debug
     def initialize(@ui : Ui)

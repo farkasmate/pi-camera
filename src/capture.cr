@@ -1,3 +1,5 @@
+require "./camera"
+
 module PiCamera
   class Capture
     def initialize

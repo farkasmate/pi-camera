@@ -1,5 +1,5 @@
 require "./spec_helper"
-require "../src/pi-camera/frame"
+require "../src/frame"
 
 module PiCamera
   describe Frame do

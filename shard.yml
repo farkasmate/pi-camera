@@ -15,9 +15,17 @@ dependencies:
     github: phenopolis/pluto
     version: ~> 1.0
 
+libraries:
+  libbcm2835: ~> 1.73
+  libcamera: ~> 0.0.4
+  libcamera-base: ~> 0.0.4
+  libcamera_c_api: ~> 0.2.1
+  libepd_2in13_v2: "*"
+  libstdc++: "*"
+
 targets:
   pi-camera:
-    main: src/pi-camera.cr
+    main: src/cli.cr
 
 crystal: 1.8.2
 

@@ -1,4 +1,5 @@
-require "./libcamera"
+require "./libcamera/camera"
+require "./libcamera/camera_manager"
 
 module PiCamera
   class Cam

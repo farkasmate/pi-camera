@@ -1,5 +1,5 @@
 require "./spec_helper"
-require "../src/pi-camera/icons"
+require "../src/icons"
 
 module PiCamera
   describe Icons do

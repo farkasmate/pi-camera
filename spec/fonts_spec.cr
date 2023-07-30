@@ -1,5 +1,5 @@
 require "./spec_helper"
-require "../src/pi-camera/fonts"
+require "../src/fonts"
 
 module PiCamera
   describe Fonts::Terminus do

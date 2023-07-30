@@ -1,3 +1,4 @@
+require "./frame"
 require "./ui"
 
 module PiCamera
