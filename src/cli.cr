@@ -58,7 +58,7 @@ module PiCamera
 
   case command
   when :capture
-    Capture.new
+    Capture.new ui
   when :debug
     Debug.new ui
   when :menu

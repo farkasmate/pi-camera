@@ -2,18 +2,44 @@ require "./camera"
 
 module PiCamera
   class Capture
-    def initialize
+    @@bayer = [
+      [ 0, 32,  8, 40,  2, 34, 10, 42],
+      [48, 16, 56, 24, 50, 18, 58, 26],
+      [12, 44,  4, 36, 14, 46,  6, 38],
+      [60, 28, 52, 20, 62, 30, 54, 22],
+      [ 3, 35, 11, 43,  1, 33,  9, 41],
+      [51, 19, 59, 27, 49, 17, 57, 25],
+      [15, 47,  7, 39, 13, 45,  5, 37],
+      [63, 31, 55, 23, 61, 29, 53, 21],
+    ]
+
+    @finished = false
+
+    def initialize(ui : Ui)
+      Signal::USR1.trap { @finished = true }
+
+      frame = Frame.new(width: 250, height: 122)
       still_config = Cam::StreamConfig.new(four_cc: Cam::FourCC::BGR888)
       viewfinder_config = Cam::StreamConfig.new(four_cc: Cam::FourCC::YUV420, width: 162, height: 122)
 
       cam = Cam.new(still_config: still_config, viewfinder_config: viewfinder_config, transform: Cam::Transform::ROT180)
       cam.capture do |still, viewfinder, focus|
-        puts "Drawing viewfinder..."
-        pp! still, viewfinder, focus
+        frame.clear
 
-        File.write("/tmp/image.jpg", still.to_jpeg)
+        if viewfinder
+          viewfinder.height.times do |y|
+            viewfinder.width.times do |x|
+              frame.set(x, y, Frame::Color::Black) if viewfinder.bytes[y*viewfinder.stride + x] < 4 * @@bayer[x%8][y%8]
+            end
+          end
+        end
 
-        true
+        frame.draw(Fonts::Terminus.text("focus: #{focus}"), x_offset: Fonts::Terminus.height, y_offset: Fonts::Terminus.height)
+        ui.display frame
+
+        File.write("/tmp/image.jpg", still.to_jpeg) if @finished
+
+        @finished
       end
     end
   end
