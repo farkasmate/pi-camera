@@ -4,6 +4,10 @@ shards:
     git: https://github.com/schovi/baked_file_system.git
     version: 0.10.0
 
+  bcm2835:
+    git: https://github.com/sleepinginsomniac/bcm2835.git
+    version: 0.1.0+git.commit.5c6aa0a3b4cb0ad2226d98e99e4464803991a5ab
+
   fontanyl:
     git: https://github.com/farkasmate/fontanyl.git
     version: 1.1.1

@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/crystal \
   | tee /tmp/build.log \
   && grep '^cc' /tmp/build.log > link.sh
 
-FROM raspbian/stretch:latest AS LIBEPD
+FROM raspbian/stretch:latest AS LIBBCM2835
 
 WORKDIR /build/
 
@@ -30,10 +30,9 @@ RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib no
     wget \
   && rm -rf /var/lib/apt/lists/*
 
-COPY epd/Makefile .
-ADD --keep-git-dir=true https://github.com/waveshare/e-Paper.git#8af38f2c89c236f8f9ebd353f69f044fd3d81cc3 e-Paper/
-
-RUN make
+RUN wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.73.tar.gz -O - | tar xvz \
+  && ./bcm2835-1.73/configure \
+  && make
 
 FROM raspbian/stretch:latest AS LIBCAMERA_C_API
 
@@ -88,7 +87,7 @@ RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib no
 COPY --from=BUILDER /build/bin/pi-camera.o bin/
 COPY --from=BUILDER /build/link.sh .
 COPY --from=LIBCAMERA_C_API /build/libcamera_c_api.a lib/
-COPY --from=LIBEPD /build/libbcm2835.a /build/libepd_2in13_v2.a lib/
+COPY --from=LIBBCM2835 /build/src/libbcm2835.a lib/
 
 RUN . ./link.sh \
   && strip bin/pi-camera

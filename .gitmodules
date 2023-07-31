@@ -1,6 +1,3 @@
-[submodule "e-Paper"]
-	path = epd/e-Paper
-	url = https://github.com/waveshare/e-Paper.git
 [submodule "QR-Code-generator"]
 	ignore = untracked
 	path = QR-Code-generator
