@@ -81,7 +81,12 @@ module EPD_2in13_v2
     DC   = 25
   end
 
-  def dev_module_init
+  enum State : UInt8
+    Low = LibBcm2835::LOW
+    High = LibBcm2835::HIGH
+  end
+
+  def module_init
     raise "bcm2835 init failed" if LibBcm2835.init == 0
 
     LibBcm2835.gpio_fsel(Pin::RST, LibBcm2835::GPIO_FSEL_OUTP)
@@ -89,7 +94,7 @@ module EPD_2in13_v2
     LibBcm2835.gpio_fsel(Pin::CS, LibBcm2835::GPIO_FSEL_OUTP)
     LibBcm2835.gpio_fsel(Pin::BUSY, LibBcm2835::GPIO_FSEL_INPT)
 
-    dev_digital_write(Pin::CS, 1)
+    set_pin(Pin::CS, :high)
 
     LibBcm2835.spi_begin                                                       # Start spi interface, set spi pin for the reuse function
     LibBcm2835.spi_setBitOrder(LibBcm2835::SPI_BIT_ORDER_MSBFIRST)             # High first transmission
@@ -99,61 +104,55 @@ module EPD_2in13_v2
     LibBcm2835.spi_setChipSelectPolarity(LibBcm2835::SPI_CS0, LibBcm2835::LOW) # enable cs0
   end
 
-  def dev_module_exit
-    dev_digital_write(Pin::CS, 0)
-    dev_digital_write(Pin::DC, 0)
-    dev_digital_write(Pin::RST, 0)
+  def module_exit
+    set_pin(Pin::CS, :low)
+    set_pin(Pin::DC, :low)
+    set_pin(Pin::RST, :low)
 
     LibBcm2835.spi_end
     LibBcm2835.close
   end
 
-  # FIXME: sleep millis.milliseconds
-  def dev_delay_ms(millis : UInt32)
-    LibBcm2835.delay(millis)
+  def busy? : Bool
+    return LibBcm2835.gpio_lev(Pin::BUSY) == 1
   end
 
-  def dev_digital_read(pin : Pin) : UInt8
-    return LibBcm2835.gpio_lev(pin)
+  def set_pin(pin : Pin, state : State)
+    LibBcm2835.gpio_write(pin, state)
   end
 
-  def dev_digital_write(pin : Pin, value : UInt8)
-    LibBcm2835.gpio_write(pin, value)
-  end
-
-  def dev_spi_writebyte(value : UInt8)
+  def spi_write_byte(value : UInt8)
     LibBcm2835.spi_transfer(value)
   end
 
   def reset
     Log.debug { "reset" }
-    dev_digital_write(Pin::RST, 1)
-    dev_delay_ms(200)
-    dev_digital_write(Pin::RST, 0)
-    dev_delay_ms(2)
-    dev_digital_write(Pin::RST, 1)
-    dev_delay_ms(200)
+    set_pin(Pin::RST, :high)
+    sleep 200.milliseconds
+    set_pin(Pin::RST, :low)
+    sleep 2.milliseconds
+    set_pin(Pin::RST, :high)
+    sleep 200.milliseconds
   end
 
-  def send_command(reg : UInt8)
-    dev_digital_write(Pin::DC, 0)
-    dev_digital_write(Pin::CS, 0)
-    dev_spi_writebyte(reg)
-    dev_digital_write(Pin::CS, 1)
+  def send_command(command : UInt8)
+    set_pin(Pin::DC, :low)
+    set_pin(Pin::CS, :low)
+    spi_write_byte(command)
+    set_pin(Pin::CS, :high)
   end
 
   def send_data(data : UInt8)
-    dev_digital_write(Pin::DC, 1)
-    dev_digital_write(Pin::CS, 0)
-    dev_spi_writebyte(data)
-    dev_digital_write(Pin::CS, 1)
+    set_pin(Pin::DC, :high)
+    set_pin(Pin::CS, :low)
+    spi_write_byte(data)
+    set_pin(Pin::CS, :high)
   end
 
-  def read_busy
+  def wait_busy
     Log.debug { "e-Paper busy" }
-    while dev_digital_read(Pin::BUSY) == 1
-      # FIXME: sleep 100.milliseconds
-      dev_delay_ms(100)
+    while busy?
+      sleep 100.milliseconds
     end
     Log.debug { "e-Paper busy release" }
   end
@@ -163,7 +162,7 @@ module EPD_2in13_v2
     send_command(0x22)
     send_data(0xC7)
     send_command(0x20)
-    read_busy
+    wait_busy
   end
 
   def turn_on_display_partial
@@ -171,7 +170,7 @@ module EPD_2in13_v2
     send_command(0x22)
     send_data(0x0C)
     send_command(0x20)
-    read_busy
+    wait_busy
   end
 
   def init(mode : Mode)
@@ -188,9 +187,9 @@ module EPD_2in13_v2
   end
 
   private def init_full
-    read_busy
+    wait_busy
     send_command(0x12) # soft reset
-    read_busy
+    wait_busy
 
     send_command(0x74) # set analog block control
     send_data(0x54)
@@ -242,14 +241,14 @@ module EPD_2in13_v2
     send_command(0x4F) # set RAM y address count to 0X127;
     send_data(0xF9)
     send_data(0x00)
-    read_busy
+    wait_busy
   end
 
   private def init_partial
     send_command(0x2C) # VCOM Voltage
     send_data(0x26)
 
-    read_busy
+    wait_busy
 
     send_command(0x32)
     70.times { |index| send_data(LUT_PARTIAL_UPDATE[index]) }
@@ -267,7 +266,7 @@ module EPD_2in13_v2
     send_data(0xC0)
 
     send_command(0x20)
-    read_busy
+    wait_busy
 
     send_command(0x3C) # BorderWavefrom
     send_data(0x01)
@@ -318,6 +317,6 @@ module EPD_2in13_v2
 
     send_command(0x10) # enter deep sleep
     send_data(0x01)
-    dev_delay_ms(100)
+    sleep 100.milliseconds
   end
 end

@@ -15,7 +15,7 @@ module PiCamera
     alias Mode = EPD_2in13_v2::Mode
 
     def initialize(@mode : Mode = Mode::Full)
-      EPD_2in13_v2.dev_module_init
+      EPD_2in13_v2.module_init
       EPD_2in13_v2.init Mode::Full
       @display_partial = false
 
@@ -29,7 +29,7 @@ module PiCamera
           display @frame
         end
 
-        EPD_2in13_v2.dev_module_exit
+        EPD_2in13_v2.module_exit
       end
 
       return if @mode.full?
