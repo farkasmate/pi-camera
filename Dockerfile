@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1-labs
-FROM crystallang/crystal:1.8.2-alpine AS BUILDER
+FROM matefarkas/crystal:1.8.2-alpine AS BUILDER
 
 ENV CRYSTAL_LIBRARY_PATH=/build/lib
 
