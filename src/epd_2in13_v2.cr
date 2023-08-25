@@ -82,7 +82,7 @@ module EPD_2in13_v2
   end
 
   enum State : UInt8
-    Low = LibBcm2835::LOW
+    Low  = LibBcm2835::LOW
     High = LibBcm2835::HIGH
   end
 
@@ -125,16 +125,6 @@ module EPD_2in13_v2
     LibBcm2835.spi_transfer(value)
   end
 
-  def reset
-    Log.debug { "reset" }
-    set_pin(Pin::RST, :high)
-    sleep 200.milliseconds
-    set_pin(Pin::RST, :low)
-    sleep 2.milliseconds
-    set_pin(Pin::RST, :high)
-    sleep 200.milliseconds
-  end
-
   def send_command(command : UInt8)
     set_pin(Pin::DC, :low)
     set_pin(Pin::CS, :low)
@@ -174,8 +164,15 @@ module EPD_2in13_v2
   end
 
   def init(mode : Mode)
-    Log.debug { "init" }
-    reset
+    Log.debug { "init #{mode}" }
+
+    # reset
+    set_pin(Pin::RST, :high)
+    sleep 200.milliseconds
+    set_pin(Pin::RST, :low)
+    sleep 2.milliseconds
+    set_pin(Pin::RST, :high)
+    sleep 200.milliseconds
 
     case mode
     when Mode::Full

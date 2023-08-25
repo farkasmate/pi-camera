@@ -18,6 +18,8 @@ module PiCamera
     def initialize(ui : Ui)
       Signal::USR1.trap { @finished = true }
 
+      ui.mode Ui::Mode::Partial
+
       frame = Frame.new(width: 250, height: 122)
       still_config = Cam::StreamConfig.new(four_cc: Cam::FourCC::BGR888)
       viewfinder_config = Cam::StreamConfig.new(four_cc: Cam::FourCC::YUV420, width: 162, height: 122)
@@ -35,7 +37,7 @@ module PiCamera
         end
 
         frame.draw(Fonts::Terminus.text("focus: #{focus}"), x_offset: Fonts::Terminus.height, y_offset: Fonts::Terminus.height)
-        ui.display frame
+        ui.display(frame, timeout: 40.milliseconds)
 
         File.write("/tmp/image.jpg", still.to_jpeg) if @finished
 

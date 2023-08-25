@@ -3,6 +3,8 @@ require "./fonts"
 module PiCamera
   class Debug
     def initialize(ui : Ui)
+      ui.mode Ui::Mode::Full
+
       hostname = shell "hostname"
       ssid = shell "iwgetid --raw"
       ip_address = shell "hostname --all-ip-addresses"

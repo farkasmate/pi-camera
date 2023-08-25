@@ -30,6 +30,8 @@ module PiCamera
         puts "Selected option: #{@selection}"
       end
 
+      ui.mode Ui::Mode::Partial
+
       spawn do
         loop do
           4.times do |index|

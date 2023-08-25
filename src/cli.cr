@@ -1,3 +1,4 @@
+require "log"
 require "option_parser"
 
 require "./capture"
@@ -8,6 +9,8 @@ require "./pidfile"
 require "./ui"
 
 module PiCamera
+  Log.setup_from_env
+
   pid_path = "./pi-camera.pid"
   is_remote_control = false
 
@@ -54,7 +57,7 @@ module PiCamera
     exit 0
   end
 
-  ui = is_headless ? Ui::Stdout.new : Ui::Epd.new Ui::Epd::Mode::Partial
+  ui = is_headless ? Ui::Stdout.new : Ui::Epd.new
 
   case command
   when :capture
