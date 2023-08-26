@@ -39,8 +39,7 @@ module PiCamera
         request.add_buffer(stream, buffer)
 
         return ImageData.new(
-          bytes: memory.as(Pointer(UInt8)),
-          bytesize: plane_length,
+          bytes: Bytes.new(memory.as(Pointer(UInt8)), plane_length),
           width: config.size.width,
           height: config.size.height,
           stride: config.stride,

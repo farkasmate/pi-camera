@@ -1,12 +1,35 @@
 require "pluto/format/binding/lib_jpeg_turbo"
+require "yaml"
 
 require "./enums"
 
 module PiCamera
   class ImageData
-    getter bytes, bytesize, width, height, stride, format
+    include YAML::Serializable
 
-    def initialize(@bytes : Pointer(UInt8), @bytesize : UInt64, @width : UInt32, @height : UInt32, @stride : UInt32, @format : Cam::FourCC)
+    @[YAML::Field(ignore: true)]
+    property bytes = Bytes.new(0)
+
+    getter width, height, stride, format
+
+    getter raw_file : String = ""
+
+    def self.from_metadata_file(path : String) : ImageData
+      ret = ImageData.from_yaml(File.read(path))
+      ret.bytes = File.read(File.join(File.dirname(path), ret.raw_file)).to_slice
+      return ret
+    end
+
+    def save(name : String, directory : String = ".")
+      @raw_file = "#{name}.raw"
+      metadata_path = File.join(directory, "#{name}.yaml")
+      raw_path = File.join(directory, @raw_file)
+
+      File.write(metadata_path, self.to_yaml)
+      File.write(raw_path, bytes)
+    end
+
+    def initialize(@bytes : Bytes, @width : UInt32, @height : UInt32, @stride : UInt32, @format : Cam::FourCC)
     end
 
     def to_jpeg : Bytes
@@ -45,7 +68,7 @@ module PiCamera
     end
 
     private def compress_rgb
-      return jpeg_turbo_compress(bytes, width, height, stride, 95)
+      return jpeg_turbo_compress(bytes.to_unsafe, width, height, stride, 95)
     end
 
     private def to_rgb(y : UInt8, u : UInt8, v : UInt8) : {UInt8, UInt8, UInt8}
@@ -59,15 +82,13 @@ module PiCamera
     end
 
     private def compress_yvyu
-      data = Bytes.new(bytes, bytesize).to_unsafe_bytes
-
       size = width * height
 
       red = Array(UInt8).new(size, 0)
       green = Array(UInt8).new(size, 0)
       blue = Array(UInt8).new(size, 0)
       alpha = Array(UInt8).new(size, 255)
-      data.each_slice(4).with_index do |pixel, index|
+      bytes.each_slice(4).with_index do |pixel, index|
         y1 = pixel[0]
         v = pixel[1]
         y2 = pixel[2]

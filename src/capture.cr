@@ -43,11 +43,9 @@ module PiCamera
 
         if @click
           spawn do
-            raw = Bytes.new(still.bytes, still.bytesize).to_unsafe_bytes
-
             start = Time.monotonic
-            File.write("./DCIM_test/pi_camera_#{Time.utc.to_unix_ms}.raw", raw)
-            Log.debug { "Writing raw image data took: #{Time.monotonic - start}" }
+            still.save("pi_camera_#{Time.utc.to_unix_ms}", directory: "./DCIM_test")
+            Log.debug { "Writing image data took: #{Time.monotonic - start}" }
           end
           @click = false
         end

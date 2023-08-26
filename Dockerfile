@@ -72,6 +72,7 @@ RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib no
     build-essential \
     libcamera-dev \
     libevent-dev \
+    libyaml-dev \
     libgc-dev \
     libgmp-dev \
     libpcre2-dev \
