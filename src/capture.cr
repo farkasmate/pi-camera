@@ -13,10 +13,12 @@ module PiCamera
       [63, 31, 55, 23, 61, 29, 53, 21],
     ]
 
+    @click = false
     @finished = false
 
     def initialize(ui : Ui)
-      Signal::USR1.trap { @finished = true }
+      Signal::USR1.trap { @click = true }
+      Signal::USR2.trap { @finished = true }
 
       ui.mode Ui::Mode::Partial
 
@@ -39,7 +41,16 @@ module PiCamera
         frame.draw(Fonts::Terminus.text("focus: #{focus}"), x_offset: Fonts::Terminus.height, y_offset: Fonts::Terminus.height)
         ui.display(frame, timeout: 40.milliseconds)
 
-        File.write("/tmp/image.jpg", still.to_jpeg) if @finished
+        if @click
+          spawn do
+            raw = Bytes.new(still.bytes, still.bytesize).to_unsafe_bytes
+
+            start = Time.monotonic
+            File.write("./DCIM_test/pi_camera_#{Time.utc.to_unix_ms}.raw", raw)
+            Log.debug { "Writing raw image data took: #{Time.monotonic - start}" }
+          end
+          @click = false
+        end
 
         @finished
       end
