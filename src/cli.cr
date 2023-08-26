@@ -6,6 +6,7 @@ require "./debug"
 require "./epd"
 require "./menu"
 require "./pidfile"
+require "./sync"
 require "./ui"
 
 module PiCamera
@@ -66,6 +67,8 @@ module PiCamera
     Debug.new ui
   when :menu
     Menu.new ui
+  when :sync
+    Sync.new ui
   else
     puts parser
     exit 1
