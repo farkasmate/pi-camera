@@ -66,7 +66,6 @@ module PiCamera
     Debug.new ui
   when :menu
     Menu.new ui
-    sleep 10.seconds
   else
     puts parser
     exit 1

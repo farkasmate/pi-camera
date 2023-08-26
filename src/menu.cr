@@ -32,27 +32,25 @@ module PiCamera
 
       ui.mode Ui::Mode::Partial
 
-      spawn do
-        loop do
-          4.times do |index|
-            @frame.clear
-            @frame.draw(@@options[-1][0], x_offset: 18, y_offset: 37)     # FIXME
-            @frame.draw(@@options[0][index], x_offset: 101, y_offset: 37) # FIXME
-            @frame.draw(@@options[1][0], x_offset: 184, y_offset: 37)     # FIXME
-            @ui.display @frame
-            Fiber.yield
+      loop do
+        4.times do |index|
+          @frame.clear
+          @frame.draw(@@options[-1][0], x_offset: 18, y_offset: 37)     # FIXME
+          @frame.draw(@@options[0][index], x_offset: 101, y_offset: 37) # FIXME
+          @frame.draw(@@options[1][0], x_offset: 184, y_offset: 37)     # FIXME
+          @ui.display @frame
+          Fiber.yield
 
-            break if @is_next
-          end
-
-          animate_next if @is_next
-          break if @is_selected
+          break if @is_next
         end
 
-        case @selection
-        when :debug
-          Debug.new @ui
-        end
+        animate_next if @is_next
+        break if @is_selected
+      end
+
+      case @selection
+      when :debug
+        Debug.new @ui
       end
     end
 
