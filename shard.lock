@@ -1,5 +1,9 @@
 version: 2.0
 shards:
+  backtracer:
+    git: https://github.com/sija/backtracer.cr.git
+    version: 1.2.2
+
   baked_file_system:
     git: https://github.com/schovi/baked_file_system.git
     version: 0.10.0
@@ -8,13 +12,25 @@ shards:
     git: https://github.com/sleepinginsomniac/bcm2835.git
     version: 0.1.0+git.commit.5c6aa0a3b4cb0ad2226d98e99e4464803991a5ab
 
+  exception_page:
+    git: https://github.com/crystal-loot/exception_page.git
+    version: 0.3.1
+
   fontanyl:
     git: https://github.com/farkasmate/fontanyl.git
     version: 1.1.1
 
+  kemal:
+    git: https://github.com/kemalcr/kemal.git
+    version: 1.4.0
+
   pluto:
     git: https://github.com/phenopolis/pluto.git
     version: 1.0.1
+
+  radix:
+    git: https://github.com/luislavena/radix.git
+    version: 0.4.1
 
   stumpy_core:
     git: https://github.com/stumpycr/stumpy_core.git

@@ -6,4 +6,6 @@
 /bin/
 /docs/
 /lib/
+client_secret.json
+token.json
 !.gitkeep
