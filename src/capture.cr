@@ -1,5 +1,7 @@
 require "./camera"
 require "./dcim"
+require "./fonts"
+require "./frame"
 
 module PiCamera
   class Capture

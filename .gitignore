@@ -7,5 +7,6 @@
 /docs/
 /lib/
 client_secret.json
+pi-camera.pid
 token.json
 !.gitkeep
