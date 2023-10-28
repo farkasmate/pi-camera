@@ -10,24 +10,9 @@ module PiCamera
     @[YAML::Field(ignore: true)]
     property bytes = Bytes.new(0)
 
-    getter width, height, stride, format
+    property width, height, stride, format
 
-    getter raw_file : String = ""
-
-    def self.from_metadata_file(path : String) : ImageData
-      ret = ImageData.from_yaml(File.read(path))
-      ret.bytes = File.read(File.join(File.dirname(path), ret.raw_file)).to_slice
-      return ret
-    end
-
-    def save(name : String, directory : String = ".")
-      @raw_file = "#{name}.raw"
-      metadata_path = File.join(directory, "#{name}.yaml")
-      raw_path = File.join(directory, @raw_file)
-
-      File.write(metadata_path, self.to_yaml)
-      File.write(raw_path, bytes)
-    end
+    property raw_file : String = ""
 
     def initialize(@bytes : Bytes, @width : UInt32, @height : UInt32, @stride : UInt32, @format : Cam::FourCC)
     end

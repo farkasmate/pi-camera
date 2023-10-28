@@ -1,4 +1,5 @@
 require "./camera"
+require "./dcim"
 
 module PiCamera
   class Capture
@@ -44,7 +45,7 @@ module PiCamera
         if @click
           spawn do
             start = Time.monotonic
-            still.save("pi_camera_#{Time.utc.to_unix_ms}", directory: "./DCIM_test")
+            DCIM.save_raw(still)
             Log.debug { "Writing image data took: #{Time.monotonic - start}" }
           end
           @click = false
