@@ -10,15 +10,15 @@ module PiCamera
     end
 
     it "archives" do
-      File.write(File.join(DCIM::DIRECTORY, "test.jpg"), "JPEG")
-      File.write(File.join(DCIM::DIRECTORY, "test.raw"), "RAW")
-      File.write(File.join(DCIM::DIRECTORY, "test.yaml"), "YAML")
+      File.write(Path.new(DCIM::DIRECTORY, "test.jpg"), "JPEG")
+      File.write(Path.new(DCIM::DIRECTORY, "test.raw"), "RAW")
+      File.write(Path.new(DCIM::DIRECTORY, "test.yaml"), "YAML")
 
       DCIM.archive("test")
 
-      File.delete(File.join(DCIM::DIRECTORY, "archive", "test.jpg"))
-      File.delete(File.join(DCIM::DIRECTORY, "archive", "test.raw"))
-      File.delete(File.join(DCIM::DIRECTORY, "archive", "test.yaml"))
+      File.delete(Path.new(DCIM::DIRECTORY, "archive", "test.jpg"))
+      File.delete(Path.new(DCIM::DIRECTORY, "archive", "test.raw"))
+      File.delete(Path.new(DCIM::DIRECTORY, "archive", "test.yaml"))
     end
   end
 end
