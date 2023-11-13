@@ -1,3 +1,7 @@
+require "drawille-cr"
+
+require "./epd_2in13_v2"
+
 module PiCamera
   abstract class Ui
     enum Mode
@@ -10,8 +14,21 @@ module PiCamera
   end
 
   class Ui::Stdout < Ui
+    def initialize
+      @canvas = Drawille::Canvas.new
+    end
+
     def display(frame : Frame, timeout = 1.second)
-      puts frame
+      frame.width.times do |x|
+        frame.height.times do |y|
+          @canvas.set(x, y) if frame.get(x, y) == Frame::Color::Black
+        end
+      end
+
+      puts @canvas.render
+      @canvas.clear
+
+      sleep 200.milliseconds
     end
 
     def mode(mode : Mode)
