@@ -47,12 +47,12 @@ module PiCamera
         )
       end
 
-      def configure(still_config : StreamConfig, viewfinder_config : StreamConfig?, transform : Transform) : {ImageData, ImageData?}
+      def configure(still_config : StreamConfig, viewfinder_config : StreamConfig?, orientation : Orientation) : {ImageData, ImageData?}
         roles = [LibCamera::StreamRole::STILL_CAPTURE]
         roles << LibCamera::StreamRole::VIEW_FINDER if viewfinder_config && streams_size > 1
         configs = LibCamera.camera_generate_configuration(@camera, roles.to_unsafe, roles.size)
 
-        LibCamera.camera_configuration_set_transform(configs, transform)
+        LibCamera.camera_configuration_set_orientation(configs, orientation)
 
         still = LibCamera.camera_configuration_at(configs, 0)
         still.value.buffer_count = 1

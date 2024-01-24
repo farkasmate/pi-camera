@@ -13,11 +13,11 @@ module PiCamera
       end
     end
 
-    def initialize(still_config : StreamConfig, viewfinder_config : StreamConfig? = nil, transform : Transform = Transform::IDENTITY)
+    def initialize(still_config : StreamConfig, viewfinder_config : StreamConfig? = nil, orientation : Orientation = Orientation::ROTATE0)
       manager = CameraManager.new
 
       @camera = manager[0]
-      @still_image, @viewfinder_image = @camera.configure(still_config, viewfinder_config, transform)
+      @still_image, @viewfinder_image = @camera.configure(still_config, viewfinder_config, orientation)
       @request = @camera.request
     end
 

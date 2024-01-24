@@ -14,17 +14,15 @@ ENV CRYSTAL_CACHE_DIR=/root/.cache/crystal
 RUN --mount=type=cache,target=/root/.cache/crystal \
   shards build \
   --cross-compile \
-  --target=arm-linux-gnueabihf \
+  --target=aarch64-linux-gnu \
   | tee /tmp/build.log \
   && grep '^cc' /tmp/build.log > link.sh
 
-FROM raspbian/stretch:latest AS LIBBCM2835
+FROM debian:bookworm AS LIBBCM2835
 
 WORKDIR /build/
 
-RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi' > /etc/apt/sources.list \
-  && echo 'deb http://archive.raspberrypi.org/debian/ bullseye main' >> /etc/apt/sources.list \
-  && apt-get update \
+RUN apt-get update \
   && apt-get install -y \
     build-essential \
     wget \
@@ -34,24 +32,22 @@ RUN wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.73.tar.gz -O -
   && ./bcm2835-1.73/configure \
   && make
 
-FROM raspbian/stretch:latest AS LIBCAMERA_C_API
-
-ARG LIBCAMERA_VERSION
+FROM debian:bookworm AS LIBCAMERA_C_API
 
 WORKDIR /build/
 
-RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi' > /etc/apt/sources.list \
-  && echo 'deb http://archive.raspberrypi.org/debian/ bullseye main' >> /etc/apt/sources.list \
+RUN apt-get update \
+  && apt-get install -y \
+    gnupg
+
+RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/sources.list \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E \
   && apt-get update \
   && apt-get install -y \
     build-essential \
     libcamera-dev \
-  && rm -rf /var/lib/apt/lists/* \
-  && mkdir /tmp/libcamera \
-  && wget -P /tmp/libcamera  http://archive.raspberrypi.org/debian/pool/main/libc/libcamera/libcamera-dev_${LIBCAMERA_VERSION}_armhf.deb \
-  && wget -P /tmp/libcamera  http://archive.raspberrypi.org/debian/pool/main/libc/libcamera/libcamera0_${LIBCAMERA_VERSION}_armhf.deb \
-  && dpkg -iR /tmp/libcamera \
-  && rm -rf /tmp/libcamera
+    libcamera0.1 \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY libcamera-c_api/*.cpp .
 COPY libcamera-c_api/*.h .
@@ -59,31 +55,30 @@ COPY libcamera-c_api/Makefile .
 
 RUN make
 
-FROM raspbian/stretch:latest AS LINKER
-
-ARG LIBCAMERA_VERSION
+FROM debian:bookworm AS LINKER
 
 WORKDIR /build/
 
-RUN echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi' > /etc/apt/sources.list \
-  && echo 'deb http://archive.raspberrypi.org/debian/ bullseye main' >> /etc/apt/sources.list \
+RUN apt-get update \
+  && apt-get install -y \
+    gnupg
+
+RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/sources.list \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E \
   && apt-get update \
   && apt-get install -y \
     build-essential \
     libcamera-dev \
+    libcamera0.1 \
     libevent-dev \
-    libyaml-dev \
     libgc-dev \
     libgmp-dev \
     libpcre2-dev \
+    libssl-dev \
     libturbojpeg0-dev \
+    libyaml-dev \
     zlib1g-dev \
-  && rm -rf /var/lib/apt/lists/* \
-  && mkdir /tmp/libcamera \
-  && wget -P /tmp/libcamera  http://archive.raspberrypi.org/debian/pool/main/libc/libcamera/libcamera-dev_${LIBCAMERA_VERSION}_armhf.deb \
-  && wget -P /tmp/libcamera  http://archive.raspberrypi.org/debian/pool/main/libc/libcamera/libcamera0_${LIBCAMERA_VERSION}_armhf.deb \
-  && dpkg -iR /tmp/libcamera \
-  && rm -rf /tmp/libcamera
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=BUILDER /build/bin/pi-camera.o bin/
 COPY --from=BUILDER /build/link.sh .

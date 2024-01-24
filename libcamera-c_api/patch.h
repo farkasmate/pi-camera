@@ -5,29 +5,29 @@
 
 #ifdef __cplusplus
 #include <libcamera/camera.h>
+#include <libcamera/libcamera.h>
 
-enum libcamera_camera_configuration_transform {
-    Identity = 0,
-    Rot0 = Identity,
-    HFlip = 1,
-    VFlip = 2,
-    HVFlip = HFlip | VFlip,
-    Rot180 = HVFlip,
-    Transpose = 4,
-    Rot270 = HFlip | Transpose,
-    Rot90 = VFlip | Transpose,
-    Rot180Transpose = HFlip | VFlip | Transpose
+enum libcamera_camera_configuration_orientation {
+    Rotate0 = 1,
+    Rotate0Mirror,
+    Rotate180,
+    Rotate180Mirror,
+    Rotate90Mirror,
+    Rotate270,
+    Rotate270Mirror,
+    Rotate90,
 };
 
-typedef libcamera::Transform libcamera_camera_configuration_transform_t;
+typedef libcamera::Orientation libcamera_camera_configuration_orientation_t;
 
 extern "C" {
 #else
-typedef enum libcamera_camera_configuration_transform libcamera_camera_configuration_transform_t;
+typedef enum libcamera_camera_configuration_orientation libcamera_camera_configuration_orientation_t;
 #endif
 
-void libcamera_camera_configuration_set_transform(libcamera_camera_configuration_t *config, libcamera_camera_configuration_transform_t transform);
+void libcamera_camera_configuration_set_orientation(libcamera_camera_configuration_t *config, libcamera_camera_configuration_orientation_t orientation);
 const size_t libcamera_camera_streams_size(const libcamera_camera_t *cam);
+const int libcamera_control_focus_fo_m();
 
 #ifdef __cplusplus
 }

@@ -25,7 +25,7 @@ module PiCamera
         return 0 if !complete?
 
         metadata = LibCamera.request_metadata(@request)
-        value = LibCamera.control_list_get(metadata, LibCamera::ControlId::FOCUS)
+        value = LibCamera.control_list_get(metadata, LibCamera.control_focus_fo_m)
 
         return value.null? ? 0 : LibCamera.control_value_get(value).as(Pointer(Int32)).value
       end

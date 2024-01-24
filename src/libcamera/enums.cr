@@ -6,17 +6,15 @@ module PiCamera
       YVYU   = 1448695129
     end
 
-    enum Transform
-      IDENTITY        = 0
-      ROT0            = IDENTITY
-      HFLIP           = 1
-      VFLIP           = 2
-      HVFLIP          = HFLIP | VFLIP
-      ROT180          = HVFLIP
-      TRANSPOSE       = 4
-      ROT270          = HFLIP | TRANSPOSE
-      ROT90           = VFLIP | TRANSPOSE
-      ROT180TRANSPOSE = HFLIP | VFLIP | TRANSPOSE
+    enum Orientation
+      ROTATE0 = 1
+      ROTATE0MIRROR
+      ROTATE180
+      ROTATE180MIRROR
+      ROTATE90MIRROR
+      ROTATE270
+      ROTATE270MIRROR
+      ROTATE90
     end
   end
 end

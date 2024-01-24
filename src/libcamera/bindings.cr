@@ -26,10 +26,6 @@ module PiCamera
         INVALID  = 2
       end
 
-      enum ControlId
-        FOCUS = 20
-      end
-
       struct PixelFormat
         fourcc : FourCC
         modifier : UInt64
@@ -91,9 +87,11 @@ module PiCamera
       fun camera_configuration_size = libcamera_camera_configuration_size(configs : CameraConfigurationList) : LibC::SizeT
       fun camera_configuration_at = libcamera_camera_configuration_at(configs : CameraConfigurationList, index : LibC::SizeT) : Pointer(StreamConfiguration)
       fun camera_configuration_validate = libcamera_camera_configuration_validate(configs : CameraConfigurationList) : ConfigurationStatus
-      fun camera_configuration_set_transform = libcamera_camera_configuration_set_transform(configs : CameraConfigurationList, transform : Transform) : Void
+      fun camera_configuration_set_orientation = libcamera_camera_configuration_set_orientation(configs : CameraConfigurationList, orientation : Orientation) : Void
 
-      fun control_list_get = libcamera_control_list_get(controls : ControlList, id : ControlId) : ControlValue
+      fun control_focus_fo_m = libcamera_control_focus_fo_m() : LibC::Int
+
+      fun control_list_get = libcamera_control_list_get(controls : ControlList, id : LibC::Int) : ControlValue
 
       fun control_value_get = libcamera_control_value_get(value : ControlValue) : Pointer(Void)
 
