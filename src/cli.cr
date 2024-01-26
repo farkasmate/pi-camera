@@ -61,7 +61,7 @@ module PiCamera
   ui = is_headless ? Ui::Stdout.new : Ui::Epd.new
 
   case command
-  when :capture
+  when :capture, :select
     Capture.new ui
   when :debug
     Debug.new ui

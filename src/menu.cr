@@ -49,8 +49,12 @@ module PiCamera
       end
 
       case @selection
+      when :capture
+        Capture.new @ui
       when :debug
         Debug.new @ui
+      when :sync
+        Sync.new @ui
       end
     end
 
