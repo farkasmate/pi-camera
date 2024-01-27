@@ -1,3 +1,5 @@
+require "log"
+
 require "./icons"
 
 module PiCamera
@@ -27,7 +29,7 @@ module PiCamera
                      else
                        :error
                      end
-        puts "Selected option: #{@selection}"
+        Log.debug { "Selected option: #{@selection}" }
       end
 
       ui.mode Ui::Mode::Partial

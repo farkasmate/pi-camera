@@ -29,10 +29,11 @@ module PiCamera
         while !@request.complete?
           return if @request.cancelled?
 
-          puts "Waiting for capture to finish..."
+          Log.debug { "Waiting for capture to finish..." }
           sleep 100.milliseconds
         end
-        puts "Calling user callback"
+
+        Log.debug { "Calling user callback" }
 
         return if request_callback.call(@still_image, @viewfinder_image, @request.focus)
 

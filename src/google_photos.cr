@@ -20,8 +20,8 @@ module PiCamera
           state: Base64.encode(Random::Secure.random_bytes(16)),
         )
 
-        puts "Visit to authenticate:"
-        puts "  http://localhost:8080/auth"
+        Log.info { "Visit to authenticate:" }
+        Log.info { "  http://localhost:8080/auth" }
 
         authorization_code = redirect_user(authorize_uri)
         access_token = oauth2_client.get_access_token_using_authorization_code(authorization_code)
@@ -51,7 +51,7 @@ module PiCamera
       data = client.get("/v1/albums").body
       albums = JSON.parse(data)["albums"].as_a.map { |album| album["title"] }
 
-      albums.each { |album| puts album }
+      albums.each { |album| Log.debug { album } }
     end
 
     # TODO: Batch create?
