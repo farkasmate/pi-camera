@@ -14,6 +14,9 @@ RUN --mount=type=cache,target=/root/.cache/crystal \
   shards build \
   --cross-compile \
   --target=aarch64-linux-gnu \
+  --frozen \
+#  --production \ # same as `--frozen --without-development`
+#  -Dpreview_mt \
   | tee /tmp/build.log \
   && grep '^cc' /tmp/build.log > link.sh
 
@@ -84,8 +87,8 @@ COPY --from=builder /build/link.sh .
 COPY --from=libcamera_c_api /build/libcamera_c_api.a lib/
 COPY --from=libbcm2835 /build/src/libbcm2835.a lib/
 
-RUN . ./link.sh \
-  && strip bin/pi-camera
+RUN . ./link.sh
+#  && strip bin/pi-camera
 
 ENTRYPOINT ["/bin/bash"]
 
@@ -97,3 +100,17 @@ COPY --from=LINKER /build/bin/pi-camera .
 
 CMD cp /export/pi-camera bin/ \
   && chown `stat -c %u:%g bin` bin/pi-camera
+
+FROM busybox:latest AS DEV_LIBS
+
+COPY --from=LIBBCM2835 /build/src/libbcm2835.a /temp/lib/
+COPY --from=LIBCAMERA_C_API /build/libcamera_c_api.a /temp/lib/
+COPY --from=LIBCAMERA_C_API /usr/include/libcamera/ /temp/include/
+COPY --from=LIBCAMERA_C_API /usr/lib/aarch64-linux-gnu/libcamera* /temp/lib/
+COPY --from=LIBCAMERA_C_API /usr/lib/aarch64-linux-gnu/liblttng-ust* /temp/lib/
+COPY --from=LIBCAMERA_C_API /usr/lib/aarch64-linux-gnu/libpisp* /temp/lib/
+COPY --from=LINKER /usr/lib/aarch64-linux-gnu/libboost* /temp/lib/
+COPY --from=LINKER /usr/lib/aarch64-linux-gnu/libgc.* /temp/lib/
+COPY --from=LINKER /usr/lib/aarch64-linux-gnu/libgccpp.* /temp/lib/
+COPY --from=LINKER /usr/lib/aarch64-linux-gnu/libgctba.* /temp/lib/
+COPY --from=LINKER /usr/lib/aarch64-linux-gnu/libturbojpeg* /temp/lib/

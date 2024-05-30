@@ -14,3 +14,14 @@ services:
     volumes:
       - ./:/workdir/:rw
     working_dir: /workdir
+    tty: true
+
+  dev-libs:
+    build:
+      context: .
+      target: DEV_LIBS
+    network_mode: default
+    volumes:
+      - ${PWD}:/workdir:rw
+    working_dir: /workdir
+    tty: true
