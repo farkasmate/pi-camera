@@ -26,7 +26,7 @@ module EPD_2in13_v2
   extend self
 
   ::Log.setup_from_env
-  Log = ::Log.for "EPD_in13_v2"
+  Log = ::Log.for "EPD_2in13_v2"
 
   # NOTE: Width and height are swapped here (landscape)
   WIDTH     =  250
