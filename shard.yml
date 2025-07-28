@@ -1,13 +1,13 @@
 name: pi-camera
-version: 2.0.0
+version: 2.1.0
 
 authors:
-  - Mate Farkas <mate.farkas@sch.hu>
+  - Mate Farkas <y2k.elma@gmail.com>
 
 dependencies:
   baked_file_system:
     github: schovi/baked_file_system
-    version: ~> 0.10
+    version: ~> 0.11
   bcm2835:
     github: sleepinginsomniac/bcm2835
     commit: 5c6aa0a3b4cb0ad2226d98e99e4464803991a5ab
@@ -19,15 +19,14 @@ dependencies:
     version: ~> 1.1
   kemal:
     github: kemalcr/kemal
-    version: ~> 1.4
+    version: ~> 1.7
   pluto:
     github: phenopolis/pluto
     version: ~> 1.0
 
 libraries:
-  libbcm2835: ~> 1.73
-  libcamera: ~> 0.0.4
-  libcamera-base: ~> 0.0.4
+  libbcm2835: ~> 1.75
+  libcamera: ~> 0.5.1
   libcamera_c_api: ~> 0.2.1
   libepd_2in13_v2: "*"
   libstdc++: "*"
@@ -36,6 +35,6 @@ targets:
   pi-camera:
     main: src/cli.cr
 
-crystal: 1.8.2
+crystal: 1.17.1
 
 license: WTFPL

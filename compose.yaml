@@ -8,10 +8,9 @@ services:
   arm64:
     build:
       context: .
-      target: DEPLOYER
+      target: deployer
     image: pi-camera
     network_mode: default
     volumes:
-      - ${PWD}:/workdir:rw
+      - ./:/workdir/:rw
     working_dir: /workdir
-    tty: true

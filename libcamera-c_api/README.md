@@ -3,7 +3,7 @@
 Sources were copied from a [libcamera-rs][libcamera_rs] Rust crate and modified in [patch.h](./patch.h) and [patch.cpp](./patch.cpp).
 The original README and licenses are included below.
 
-[libcamera_rs]: https://github.com/lit-robotics/libcamera-rs/tree/df2d09f9c03aa5a74352197e076405c1010a6cff/libcamera-sys/c_api
+[libcamera_rs]: https://github.com/lit-robotics/libcamera-rs/tree/e01e1de8c5da22442db14ebcf21463112c0d2518/libcamera-sys/c_api
 
 ---
 
@@ -25,7 +25,7 @@ Unreleased documentation for `main`: [here](https://lit-robotics.github.io/libca
 
 ## Building
 
-`libcamera-sys` requires [libcamera](https://libcamera.org/) installed and accessible via pkg-config. Check official [getting started guide](https://libcamera.org/getting-started.html) on how to build libcamera. Note that we don't have a release schedule tied to libcamera yet so breaking changes are likely. This also means that any binary distributions (e.g. in Ubuntu 22.04) will likely be too old. This crate is known to build with libcamera  `v0.1.0`.
+`libcamera-sys` requires [libcamera](https://libcamera.org/) installed and accessible via pkg-config. Check official [getting started guide](https://libcamera.org/getting-started.html) on how to build libcamera. Note that we don't have a release schedule tied to libcamera yet so breaking changes are likely. This also means that any binary distributions (e.g. in Ubuntu 22.04) will likely be too old. This crate is known to build with libcamera `v0.4.0` and up.
 
 No other special dependencies are needed. All crates can be built from the root workspace dir with `cargo build`.
 

@@ -3,7 +3,7 @@
 .DS_Store
 /.shards/
 /DCIM_test/*
-/bin/
+/bin/*
 /docs/
 /lib/
 client_secret.json

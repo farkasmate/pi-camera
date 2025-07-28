@@ -1,6 +1,7 @@
-# syntax=docker/dockerfile:1-labs
-FROM matefarkas/crystal:1.8.2-alpine AS BUILDER
+# syntax=docker/dockerfile:1.17
+FROM crystallang/crystal:1.17.1-alpine-build AS builder
 
+ENV CRYSTAL_CACHE_DIR=/root/.cache/crystal
 ENV CRYSTAL_LIBRARY_PATH=/build/lib
 
 WORKDIR /build/
@@ -9,8 +10,6 @@ COPY shard.yml shard.lock .
 COPY spec/ spec/
 COPY src/ src/
 
-ENV CRYSTAL_CACHE_DIR=/root/.cache/crystal
-
 RUN --mount=type=cache,target=/root/.cache/crystal \
   shards build \
   --cross-compile \
@@ -18,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/crystal \
   | tee /tmp/build.log \
   && grep '^cc' /tmp/build.log > link.sh
 
-FROM debian:bookworm AS LIBBCM2835
+FROM --platform=linux/arm64 debian:bookworm AS libbcm2835
 
 WORKDIR /build/
 
@@ -28,11 +27,11 @@ RUN apt-get update \
     wget \
   && rm -rf /var/lib/apt/lists/*
 
-RUN wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.73.tar.gz -O - | tar xvz \
-  && ./bcm2835-1.73/configure \
+RUN wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.75.tar.gz -O - | tar xvz \
+  && ./bcm2835-1.75/configure \
   && make
 
-FROM debian:bookworm AS LIBCAMERA_C_API
+FROM --platform=linux/arm64 debian:bookworm AS libcamera_c_api
 
 WORKDIR /build/
 
@@ -46,7 +45,7 @@ RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/s
   && apt-get install -y \
     build-essential \
     libcamera-dev \
-    libcamera0.1 \
+    libcamera0.5 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY libcamera-c_api/*.cpp .
@@ -55,7 +54,7 @@ COPY libcamera-c_api/Makefile .
 
 RUN make
 
-FROM debian:bookworm AS LINKER
+FROM --platform=linux/arm64 debian:bookworm AS linker
 
 WORKDIR /build/
 
@@ -69,7 +68,7 @@ RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/s
   && apt-get install -y \
     build-essential \
     libcamera-dev \
-    libcamera0.1 \
+    libcamera0.5 \
     libevent-dev \
     libgc-dev \
     libgmp-dev \
@@ -80,17 +79,17 @@ RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/s
     zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=BUILDER /build/bin/pi-camera.o bin/
-COPY --from=BUILDER /build/link.sh .
-COPY --from=LIBCAMERA_C_API /build/libcamera_c_api.a lib/
-COPY --from=LIBBCM2835 /build/src/libbcm2835.a lib/
+COPY --from=builder /build/bin/pi-camera.o bin/
+COPY --from=builder /build/link.sh .
+COPY --from=libcamera_c_api /build/libcamera_c_api.a lib/
+COPY --from=libbcm2835 /build/src/libbcm2835.a lib/
 
 RUN . ./link.sh \
   && strip bin/pi-camera
 
 ENTRYPOINT ["/bin/bash"]
 
-FROM busybox:latest AS DEPLOYER
+FROM busybox:latest AS deployer
 
 WORKDIR /export/
 
