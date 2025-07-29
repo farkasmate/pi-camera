@@ -5,11 +5,11 @@ services:
     network_mode: default
     privileged: true
 
-  arm64:
+  pi-camera:
+    image: matefarkas/pi-camera:latest
     build:
       context: .
       target: deployer
-    image: pi-camera
     network_mode: default
     volumes:
       - ./:/workdir/:rw
