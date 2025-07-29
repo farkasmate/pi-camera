@@ -79,12 +79,14 @@ RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/s
     zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
+COPY --from=builder /build/bin/epd.o bin/
 COPY --from=builder /build/bin/pi-camera.o bin/
 COPY --from=builder /build/link.sh .
 COPY --from=libcamera_c_api /build/libcamera_c_api.a lib/
 COPY --from=libbcm2835 /build/src/libbcm2835.a lib/
 
-RUN . ./link.sh \
+RUN bash -eu link.sh \
+  && strip bin/epd \
   && strip bin/pi-camera
 
 ENTRYPOINT ["/bin/bash"]
@@ -93,7 +95,8 @@ FROM busybox:latest AS deployer
 
 WORKDIR /export/
 
+COPY --from=LINKER /build/bin/epd .
 COPY --from=LINKER /build/bin/pi-camera .
 
-CMD cp /export/pi-camera bin/ \
-  && chown `stat -c %u:%g bin` bin/pi-camera
+CMD cp /export/* bin/ \
+  && chown `stat -c %u:%g bin` bin/*

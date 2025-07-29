@@ -1,7 +1,7 @@
 require "bit_array"
 
 module PiCamera
-  class Frame
+  struct Frame
     enum Color
       Black # false
       White # true
