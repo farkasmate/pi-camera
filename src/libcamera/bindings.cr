@@ -89,7 +89,7 @@ module PiCamera
       fun camera_configuration_validate = libcamera_camera_configuration_validate(configs : CameraConfigurationList) : ConfigurationStatus
       fun camera_configuration_set_orientation = libcamera_camera_configuration_set_orientation(configs : CameraConfigurationList, orientation : Orientation) : Void
 
-      fun control_focus_fo_m = libcamera_control_focus_fo_m() : LibC::Int
+      fun control_focus_fo_m = libcamera_control_focus_fo_m : LibC::Int
 
       fun control_list_get = libcamera_control_list_get(controls : ControlList, id : LibC::Int) : ControlValue
 

@@ -7,7 +7,7 @@ module PiCamera
     end
 
     enum Orientation
-      ROTATE0 = 1
+      ROTATE0         = 1
       ROTATE0MIRROR
       ROTATE180
       ROTATE180MIRROR
