@@ -11,7 +11,7 @@ module PiCamera
 
     @buffer : Slice(BitArray)
 
-    def initialize(@width : Int32, @height : Int32)
+    def initialize(@width : Int32 = 250, @height : Int32 = 122)
       @buffer = Bytes.new(@width).map { |slice| BitArray.new(@height, true) }
     end
 

@@ -8,6 +8,7 @@ require "./menu"
 require "./pidfile"
 require "./sync"
 require "./ui"
+require "./ui/*"
 
 module PiCamera
   Log.setup_from_env

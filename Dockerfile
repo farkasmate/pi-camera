@@ -7,11 +7,17 @@ ENV CRYSTAL_LIBRARY_PATH=/build/lib
 WORKDIR /build/
 
 COPY shard.yml shard.lock .
+
+RUN --mount=type=cache,target=/root/.cache/crystal \
+  shards install
+
 COPY spec/ spec/
 COPY src/ src/
 
+# TODO: Add `--release`
 RUN --mount=type=cache,target=/root/.cache/crystal \
-  shards build \
+  set -o pipefail \
+  && shards --production build \
   --cross-compile \
   --target=aarch64-linux-gnu \
   | tee /tmp/build.log \
