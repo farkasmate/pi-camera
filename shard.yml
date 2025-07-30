@@ -32,8 +32,8 @@ libraries:
   libstdc++: "*"
 
 targets:
-  epd:
-    main: src/epd_cli.cr
+  pi-camera-display:
+    main: src/display.cr
   pi-camera:
     main: src/cli.cr
 

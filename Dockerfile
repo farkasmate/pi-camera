@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.17
-FROM crystallang/crystal:1.17.1-alpine-build AS builder
+FROM --platform=linux/amd64 crystallang/crystal:1.17.1-alpine-build AS builder
 
 ENV CRYSTAL_CACHE_DIR=/root/.cache/crystal
 ENV CRYSTAL_LIBRARY_PATH=/build/lib
@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/root/.cache/crystal \
   | tee /tmp/build.log \
   && grep '^cc' /tmp/build.log > link.sh
 
-FROM --platform=linux/arm64 debian:bookworm AS libbcm2835
+FROM debian:bookworm AS libbcm2835
 
 WORKDIR /build/
 
@@ -37,7 +37,7 @@ RUN wget --quiet http://www.airspayce.com/mikem/bcm2835/bcm2835-1.75.tar.gz -O -
   && ./bcm2835-1.75/configure \
   && make
 
-FROM --platform=linux/arm64 debian:bookworm AS libcamera_c_api
+FROM debian:bookworm AS libcamera_c_api
 
 WORKDIR /build/
 
@@ -60,7 +60,7 @@ COPY libcamera-c_api/Makefile .
 
 RUN make
 
-FROM --platform=linux/arm64 debian:bookworm AS linker
+FROM debian:bookworm AS linker
 
 WORKDIR /build/
 
@@ -85,14 +85,14 @@ RUN echo 'deb http://archive.raspberrypi.com/debian/ bookworm main' > /etc/apt/s
     zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /build/bin/epd.o bin/
+COPY --from=builder /build/bin/pi-camera-display.o bin/
 COPY --from=builder /build/bin/pi-camera.o bin/
 COPY --from=builder /build/link.sh .
 COPY --from=libcamera_c_api /build/libcamera_c_api.a lib/
 COPY --from=libbcm2835 /build/src/libbcm2835.a lib/
 
 RUN bash -eu link.sh \
-  && strip bin/epd \
+  && strip bin/pi-camera-display \
   && strip bin/pi-camera
 
 ENTRYPOINT ["/bin/bash"]
@@ -101,8 +101,20 @@ FROM busybox:latest AS deployer
 
 WORKDIR /export/
 
-COPY --from=LINKER /build/bin/epd .
-COPY --from=LINKER /build/bin/pi-camera .
+COPY --from=linker /build/bin/pi-camera-display .
+COPY --from=linker /build/bin/pi-camera .
 
 CMD cp /export/* bin/ \
   && chown `stat -c %u:%g bin` bin/*
+
+###
+
+FROM  busybox:latest AS dev_libs
+
+WORKDIR /export/
+
+COPY --from=libbcm2835 /build/src/libbcm2835.a .
+
+CMD mkdir -p lib/dev-libs/ \
+  && cp /export/* lib/dev-libs/ \
+  && chown -R `stat -c %u:%g lib` lib/dev-libs/

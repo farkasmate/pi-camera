@@ -15,11 +15,18 @@ module PiCamera
       end
 
       def text(string : String) : Frame
-        bitmap = @@font.get_bitmap(string, wrap: 0)[0]
+        bitmaps = string.lines.map { |line| @@font.get_bitmap(line, wrap: 0)[0] }
+        width = bitmaps.map(&.[0].size).max
+        height = bitmaps.size * bitmaps[0].size
 
-        frame = Frame.new(width: bitmap[0].size, height: bitmap.size)
-        bitmap.each.with_index do |row, y|
-          row.each.with_index { |color, x| frame.set(x, y, color ? Frame::Color::Black : Frame::Color::White) }
+        frame = Frame.new(width, height)
+
+        bitmaps.each_with_index do |bitmap, line|
+          bitmap.each.with_index do |pixel_row, y|
+            pixel_row.each.with_index do |color, x|
+              frame.set(x, line * self.height + y, color ? Frame::Color::Black : Frame::Color::White)
+            end
+          end
         end
 
         frame

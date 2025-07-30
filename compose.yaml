@@ -4,13 +4,31 @@ services:
     image: multiarch/qemu-user-static
     network_mode: default
     privileged: true
+    profiles:
+      - none
 
   pi-camera:
     image: matefarkas/pi-camera:latest
     build:
       context: .
       target: deployer
+      platforms:
+        - linux/arm64
     network_mode: default
     volumes:
       - ./:/workdir/:rw
     working_dir: /workdir
+
+  dev-libs:
+    image: matefarkas/pi-camera:dev-libs
+    build:
+      context: .
+      target: dev_libs
+      platforms:
+        - linux/amd64
+    network_mode: default
+    volumes:
+      - ./:/workdir/:rw
+    working_dir: /workdir
+    profiles:
+      - none
