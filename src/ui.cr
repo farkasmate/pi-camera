@@ -1,5 +1,5 @@
 module PiCamera
-  abstract struct Ui
+  abstract class Ui
     enum Mode
       Full
       Partial

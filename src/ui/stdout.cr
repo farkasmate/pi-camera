@@ -4,7 +4,7 @@ require "../frame"
 require "../ui"
 
 module PiCamera
-  struct Ui::Stdout < Ui
+  class Ui::Stdout < Ui
     def initialize
       @rows = 32
       @cols = 126
